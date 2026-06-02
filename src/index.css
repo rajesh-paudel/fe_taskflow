@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+:root {
+  /* ==========================================================================
+     1. Canvas & Layout Backgrounds
+     ========================================================================== */
+  --bg-app: #f8fafc; /* Soft, cool-toned canvas backdrop (Slate 50) */
+  --bg-sidebar: #f1f5f9; /* Distinct navigation pane background (Slate 100) */
+  --bg-card: #ffffff; /* Pure white for task blocks, panels, and dropdowns */
+  --bg-overlay: #ffffff; /* Modals and dialog boxes */
+
+  /* ==========================================================================
+     2. Typography & Text Hierarchy
+     ========================================================================== */
+  --text-main: #0f172a; /* Deep slate for crisp reading without pure black harshness */
+  --text-secondary: #334155; /* Secondary headers, sidebar links, and card titles */
+  --text-muted: #64748b; /* Subtext, metadata, timestamps, and descriptive text */
+  --text-placeholder: #94a3b8; /* Input field placeholder text */
+
+  /* ==========================================================================
+     3. Brand & Interactive Elements (Refined & Muted)
+     ========================================================================== */
+  /* Primary Action Colors (Login, Register, Add Task) */
+  --primary: #25478a; /* Deep, professional sapphire navy (stable & commanding) */
+  --primary-hover: #1c3566; /* Grounded, dark tone for interactive hover states */
+  --primary-text: #ffffff; /* High-contrast text color on top of primary elements */
+
+  /* Accent Branding (Active indicator bars, checkboxes, specific tag categories) */
+  --accent: #2c6e7a; /* Sophisticated slate-teal variation of the arrow color */
+  --accent-subtle: #eaf4f6; /* Extremely soft background wash for active menu item states */
+  --accent-text: #1d4b54; /* Highly readable dark teal text used on subtle backgrounds */
+
+  /* Secondary Actions (Cancel buttons, unselected toggle states) */
+  --secondary: #e2e8f0; /* Flat light slate fill */
+  --secondary-hover: #cbd5e1; /* Hover state transition for secondary actions */
+  --secondary-text: #334155; /* Neutral text for secondary interactive components */
+
+  /* ==========================================================================
+     4. Borders, Lines & Utilities
+     ========================================================================== */
+  --border-subtle: #e2e8f0; /* Light, clean divider lines for layout grids and cards */
+  --border-interactive: #cbd5e1; /* Default container outlines for form fields and elements */
+  --border-focus: #64748b; /* Highlighted border color when form fields are active */
+
+  /* Ring outline color for keyboard accessibility focus flags */
+  --focus-ring: rgba(37, 71, 138, 0.15);
+
+  /* ==========================================================================
+     5. System Feedback & Status Trackers (Desaturated)
+     ========================================================================== */
+  --success: #166534; /* Deep forest green for "Completed" states */
+  --success-bg: #f0fdf4; /* Very pale green wash for badge backgrounds */
+
+  --warning: #9a3412; /* Burnt amber/rust for "In Progress" or delayed tasks */
+  --warning-bg: #fff7ed; /* Soft peach wash for warning indicators */
+
+  --destructive: #9f1239; /* Muted corporate crimson for deletion, critical errors, or high priority */
+  --destructive-bg: #fff1f2; /* Soft red wash for destructive warnings */
+
+  /* ==========================================================================
+     6. Global Component Scaling
+     ========================================================================== */
+  --radius-sm: 4px; /* Tight inputs, smaller badge components */
+  --radius-md: 6px; /* Main button fields, standard task properties */
+  --radius-lg: 10px; /* Kanban boards, main sidebar outlines, workflow cards */
+
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+}
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+}

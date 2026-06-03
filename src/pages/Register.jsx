@@ -75,7 +75,7 @@ export default function Register() {
           </div>
 
           {/* Button */}
-          <button className="w-full bg-[var(--primary)] text-[var(--primary-text)] py-3 rounded-lg font-medium hover:bg-[var(--primary-hover)] transition-colors duration-200 ease-in-out cursor-pointer">
+          <button className="w-full bg-primary text-primary-text hover:bg-primary-hover py-3 rounded-lg font-medium transition-colors duration-200 ease-in-out cursor-pointer">
             Create Account
           </button>
         </form>
@@ -83,7 +83,7 @@ export default function Register() {
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
-          <a href="/login" className="text-[var(--text-secondary)] font-medium">
+          <a href="/login" className="text-blue-600 font-medium">
             Login
           </a>
         </p>

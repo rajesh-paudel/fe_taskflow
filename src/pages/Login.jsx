@@ -62,18 +62,15 @@ export default function Login() {
           </div>
 
           {/* Button */}
-          <button className="w-full bg-[var(--primary)] text-[var(--primary-text)] py-3 rounded-lg font-medium hover:bg-[var(--primary-hover)] transition-colors duration-200 ease-in-out cursor-pointer">
+          <button className="w-full bg-primary text-primary-text hover:bg-primary-hover py-3 rounded-lg font-medium transition-colors duration-200 ease-in-out cursor-pointer">
             Login
           </button>
         </form>
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
-          Don’t have an account?
-          <a
-            href="/register"
-            className="text-[var(--text-secondary)] font-medium"
-          >
+          Don’t have an account?{" "}
+          <a href="/register" className="text-blue-600 font-medium">
             Sign up
           </a>
         </p>

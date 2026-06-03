@@ -13,7 +13,7 @@ import About from "./pages/About";
 import Security from "./pages/security";
 function App() {
   const location = useLocation();
-  const showMarketingLayout = location.pathname !== "/dashboard";
+  const showMarketingLayout = !location.pathname.startsWith("/dashboard");
 
   return (
     <>

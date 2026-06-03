@@ -23,14 +23,10 @@ export default function ContactSales() {
 
   return (
     <section className="bg-white text-gray-900 py-24 px-6 md:px-12 min-h-screen flex items-center justify-center font-sans antialiased selection:bg-blue-100">
-      {/* Expanded wrapper max-width to allow comfortable space for larger text layers */}
       <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start">
-        {/* ========================================================================= */}
-        {/* LEFT SECTION: Brand Value & Platform Proof                              */}
-        {/* ========================================================================= */}
         <div className="lg:col-span-5 space-y-12">
           <div className="space-y-5">
-            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-950 leading-[1.1]">
+            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-primary leading-[1.1]">
               Contact our sales team
             </h1>
             <p className="text-gray-500 text-xl leading-relaxed max-w-md">
@@ -39,15 +35,13 @@ export default function ContactSales() {
             </p>
           </div>
 
-          {/* Value Stack specifically optimized for TaskFlow */}
-          <div className="space-y-6 border-t border-gray-100 pt-10">
+          <div className="space-y-6 border-t border-gray-200 pt-10">
             <h2 className="text-sm font-bold tracking-wider text-gray-400 uppercase">
               Why scaling teams choose TaskFlow
             </h2>
 
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                {/* Scaled icon blocks to fit larger text sizing parameters */}
                 <div className="mt-0.5 w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 flex-shrink-0">
                   <CheckCircle2 size={16} strokeWidth={2.5} />
                 </div>
@@ -78,25 +72,10 @@ export default function ContactSales() {
               </div>
             </div>
           </div>
-
-          {/* Minimalist Support Footer Link */}
-          <div className="pt-4 flex items-center gap-2 text-sm font-semibold text-gray-400">
-            <span>Looking for regular product documentation?</span>
-            <a
-              href="#docs"
-              className="text-blue-600 hover:underline inline-flex items-center gap-1"
-            >
-              View Developer Docs <ExternalLink size={13} />
-            </a>
-          </div>
         </div>
 
-        {/* ========================================================================= */}
-        {/* RIGHT SECTION: The Exact Form Layout from image_0256e3.png (Upscaled)      */}
-        {/* ========================================================================= */}
         <div className="lg:col-span-7 w-full">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Row 1: First Name & Last Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">
@@ -104,7 +83,7 @@ export default function ContactSales() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Ada"
+                  placeholder="Rajesh"
                   required
                   className="w-full px-4 py-3 text-base text-gray-900 bg-white border border-gray-200 rounded-md shadow-3xs placeholder-gray-300 focus:outline-hidden focus:border-gray-400 focus:ring-1 focus:ring-gray-400/20 transition-all"
                   value={formData.firstName}
@@ -119,7 +98,7 @@ export default function ContactSales() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Lovelace"
+                  placeholder="Paudel"
                   required
                   className="w-full px-4 py-3 text-base text-gray-900 bg-white border border-gray-200 rounded-md shadow-3xs placeholder-gray-300 focus:outline-hidden focus:border-gray-400 focus:ring-1 focus:ring-gray-400/20 transition-all"
                   value={formData.lastName}
@@ -130,7 +109,6 @@ export default function ContactSales() {
               </div>
             </div>
 
-            {/* Row 2: Work Email & Job Title */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">
@@ -162,7 +140,6 @@ export default function ContactSales() {
               </div>
             </div>
 
-            {/* Row 3: Company Name & Company Size */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">
@@ -170,7 +147,7 @@ export default function ContactSales() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Lovelace Inc."
+                  placeholder="TaskFlow Inc."
                   required
                   className="w-full px-4 py-3 text-base text-gray-900 bg-white border border-gray-200 rounded-md shadow-3xs placeholder-gray-300 focus:outline-hidden focus:border-gray-400 focus:ring-1 focus:ring-gray-400/20 transition-all"
                   value={formData.companyName}
@@ -203,7 +180,6 @@ export default function ContactSales() {
               </div>
             </div>
 
-            {/* Row 4: Country/Region & Phone Number */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">
@@ -241,7 +217,6 @@ export default function ContactSales() {
               </div>
             </div>
 
-            {/* Reason for Contact Select */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">
                 Reason for contact <span className="text-red-500">*</span>
@@ -270,7 +245,6 @@ export default function ContactSales() {
               </select>
             </div>
 
-            {/* Provide More Details Textarea */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">
                 Provide more details <span className="text-red-500">*</span>
@@ -287,12 +261,11 @@ export default function ContactSales() {
               />
             </div>
 
-            {/* Marketing Communication Consent Checkbox */}
             <div className="flex items-start gap-3 pt-1">
               <input
                 type="checkbox"
                 id="marketingConsent"
-                className="mt-1 w-4 h-4 rounded-sm accent-black border-gray-300 focus:ring-0 cursor-pointer"
+                className="mt-1 w-4 h-4 rounded-sm accent-primary border-gray-300 focus:ring-0 cursor-pointer"
                 checked={formData.marketingConsent}
                 onChange={(e) =>
                   setFormData({
@@ -310,18 +283,16 @@ export default function ContactSales() {
               </label>
             </div>
 
-            {/* Submit Button */}
             <div className="pt-2">
               <button
                 type="submit"
-                className="px-6 py-3 text-base font-semibold text-white bg-black hover:bg-neutral-800 active:scale-[0.99] rounded-md transition-all shadow-sm cursor-pointer"
+                className="px-6 py-3 text-base font-semibold text-primary-text bg-primary hover:bg-primary-hover active:scale-[0.99] rounded-md transition-all shadow-sm duration-300 ease-in-out cursor-pointer"
               >
                 Contact sales
               </button>
             </div>
 
-            {/* Legal Disclaimer Sub-text */}
-            <p className="text-xs leading-relaxed text-gray-400">
+            <p className="text-[13px] leading-relaxed text-gray-500">
               You may unsubscribe from receiving marketing communications any
               time. TaskFlow's websites and communication pipelines are strictly
               subject to our{" "}
@@ -332,20 +303,20 @@ export default function ContactSales() {
             </p>
           </form>
 
-          {/* Core Support / Alternate Contact Channels */}
-          <div className="mt-12 pt-6 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-400">
+          <div className="mt-8  text-[16px] text-gray-500">
             <p>
               For technical or product support, email us at{" "}
               <a
                 href="mailto:support@taskflow.com"
-                className="text-blue-600 hover:underline"
+                className="text-blue-600 hover:text-gray-700 underline "
               >
                 support@taskflow.com
-              </a>
-            </p>
-            <p className="sm:text-right">
-              Or visit our dedicated{" "}
-              <a href="#help" className="text-blue-600 hover:underline">
+              </a>{" "}
+              or visit our{" "}
+              <a
+                href="#help"
+                className="text-blue-600 hover:text-gray-700 underline"
+              >
                 Help Center
               </a>
               .

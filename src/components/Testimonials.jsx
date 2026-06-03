@@ -12,42 +12,42 @@ import oliver from "../assets/oliver.png";
 const testimonials = [
   {
     id: 1,
-    name: "Sarah Jenkins",
-    role: "Product Designer",
+    name: "Mandeep Rajbhandari",
+    role: "Frontend Developer",
     quote:
       "Streamlined my daily workflows to reduce timeline friction by almost 3x. An absolute game-changer for solo creators.",
   },
   {
     id: 2,
-    name: "Alex Rivera",
-    role: "Full Stack Developer",
+    name: "Samit Chaudhary",
+    role: "Java  Developer",
     quote:
       "Task systems get created in three minutes between meetings, then hours of manual operational work disappear.",
   },
   {
     id: 3,
-    name: "Marcus Chen",
+    name: "Ram Prasad Sharma",
     role: "Digital Strategist",
     quote:
       "This platform understands that you can solve a lot of complex organizational problems with just one beautifully simple tool.",
   },
   {
     id: 4,
-    name: "Elena Rostova",
+    name: "Hari Devkota",
     role: "Content Operations",
     quote:
       "It has been the most powerful and impactful way to centralize our creative pipeline and keep ideas moving forward.",
   },
   {
     id: 5,
-    name: "David Kim",
+    name: "Madhav Tiwari",
     role: "Software Engineer",
     quote:
       "Using these minimalist tools is an important competitive advantage for keeping my personal projects organized.",
   },
   {
     id: 6,
-    name: "Emma Watson",
+    name: "Abishekh kafle",
     role: "Creative Director",
     quote:
       "One central hub for creative thinking keeps everyone aligned, informed, and the design work flowing beautifully.",
@@ -64,8 +64,8 @@ const achievements = [
 
 export default function Testimonials() {
   const featured = {
-    name: "Oliver Bennett",
-    role: "Independent Tech Consultant",
+    name: "Rajesh Paudel",
+    role: "Software Developer",
     quote:
       "There's power in a single platform where you can do all your thinking, planning, and execution. This is that single place.",
     avatar: oliver,

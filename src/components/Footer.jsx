@@ -53,7 +53,10 @@ const socialLinks = [
 
 const Footer = () => {
   return (
-    <footer className="bg-white text-main" aria-label="TaskFlow Footer">
+    <footer
+      className="bg-white border-t border-gray-200 text-main"
+      aria-label="TaskFlow Footer"
+    >
       <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-[280px_1fr] lg:px-8">
         <section
           className="flex flex-col items-start justify-between"

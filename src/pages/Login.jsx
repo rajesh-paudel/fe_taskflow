@@ -32,7 +32,7 @@ export default function Login() {
         <div className="  flex flex-col items-center justify-center mb-8">
           <img src={logo} className="w-60 h-auto" alt="taskflow logo"></img>
 
-          <p className="text-gray-500 ">Welcome back</p>
+          <p className="text-gray-500 ">Log in to your TaskFlow account</p>
         </div>
 
         {/* Form */}

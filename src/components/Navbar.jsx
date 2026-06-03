@@ -2,13 +2,13 @@ import { Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 
 const navLinks = [
-  { title: "Features", href: "#features" },
-  { title: "About", href: "#about" },
-  { title: "Blog", href: "#blog" },
-  { title: "Solutions", href: "#solutions" },
-  { title: "Resources", href: "#resources" },
-  { title: "Enterprise", href: "#enterprise" },
-  { title: "Pricing", href: "#pricing" },
+  { title: "Features", href: "/features" },
+  { title: "About", href: "/about" },
+  { title: "Blog", href: "/blog" },
+  { title: "Solutions", href: "/solutions" },
+  { title: "Resources", href: "/resources" },
+  { title: "Enterprise", href: "/enterprise" },
+  { title: "Pricing", href: "/pricing" },
   { title: "Request a demo", href: "/contact-sales" },
 ];
 const Navbar = () => {

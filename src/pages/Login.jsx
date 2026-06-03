@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import API from "../services/api";
 import logo from "../assets/logo.png";
@@ -101,19 +101,19 @@ export default function Login() {
         {/* LEGAL COMPLIANCE DISCLAIMER */}
         <p className="text-xs text-neutral-400 leading-relaxed text-center px-2">
           By continuing, you acknowledge that you understand and agree to the{" "}
-          <a
-            href="#terms"
+          <Link
+            to="/terms-and-conditions"
             className="text-neutral-600 font-medium hover:underline"
           >
             Terms & Conditions
-          </a>{" "}
+          </Link>{" "}
           and{" "}
-          <a
-            href="#privacy"
+          <Link
+            to="/privacy-policy"
             className="text-neutral-600 font-medium hover:underline"
           >
             Privacy Policy
-          </a>
+          </Link>
           .
         </p>
 

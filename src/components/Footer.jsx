@@ -1,56 +1,61 @@
 import { FaFacebook, FaInstagram, FaLinkedin, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import logo from "../assets/logo.png";
+import { Link } from "react-router-dom";
 
 const footerColumns = [
   {
     title: "Company",
     links: [
-      "About us",
-      "Careers",
-      "Security",
-      "Status",
-      "Terms & privacy",
-      "Your privacy rights",
+      { label: "About us", path: "/about" },
+      { label: "Careers", path: "/careers" },
+      { label: "Security", path: "/security" },
+
+      { label: "Terms & Conditions", path: "/terms-and-conditions" },
+      { label: "Privacy Policy", path: "/privacy-policy" },
     ],
   },
   {
     title: "Download",
     links: [
-      "iOS & Android",
-      "Mac & Windows",
-      "Mail",
-      "Calendar",
-      "Web Clipper",
+      { label: "iOS & Android", path: "/download/mobile" },
+      { label: "Mac & Windows", path: "/download/desktop" },
+      { label: "Mail", path: "/products/mail" },
+      { label: "Calendar", path: "/products/calendar" },
+      { label: "Web Clipper", path: "/products/web-clipper" },
     ],
   },
   {
     title: "Resources",
     links: [
-      "Help center",
-      "Pricing",
-      "Blog",
-      "Community",
-      "Connections",
-      "Templates",
-      "Partner programs",
+      { label: "Help center", path: "/help" },
+      { label: "Pricing", path: "/pricing" },
+      { label: "Blog", path: "/blog" },
+      { label: "Community", path: "/community" },
+      { label: "Connections", path: "/connections" },
+      { label: "Templates", path: "/templates" },
+      { label: "Partner programs", path: "/partners" },
     ],
   },
   {
     title: "TaskFlow for",
-    links: ["Enterprise", "Small business", "Personal"],
+    links: [
+      { label: "Enterprise", path: "/solutions/enterprise" },
+      { label: "Small business", path: "/solutions/small-business" },
+      { label: "Personal", path: "/solutions/personal" },
+    ],
     cta: "Explore more",
+    ctaPath: "/solutions",
   },
 ];
 
 const socialLinks = [
-  { label: "Instagram", icon: FaInstagram },
-  { label: "X", icon: FaXTwitter },
-  { label: "LinkedIn", icon: FaLinkedin },
-  { label: "Facebook", icon: FaFacebook },
-  { label: "YouTube", icon: FaYoutube },
+  { label: "Instagram", icon: FaInstagram, url: "https://instagram.com" },
+  { label: "X", icon: FaXTwitter, url: "https://x.com" },
+  { label: "LinkedIn", icon: FaLinkedin, url: "https://linkedin.com" },
+  { label: "Facebook", icon: FaFacebook, url: "https://facebook.com" },
+  { label: "YouTube", icon: FaYoutube, url: "https://youtube.com" },
 ];
-
 const Footer = () => {
   return (
     <footer
@@ -77,7 +82,9 @@ const Footer = () => {
                 return (
                   <a
                     key={social.label}
-                    href="#"
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label={social.label}
                     className="text-xl text-gray-400 transition hover:text-black"
                   >
@@ -101,25 +108,25 @@ const Footer = () => {
               </h2>
               <ul className="mt-4 space-y-3">
                 {column.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
+                  <li key={link.label}>
+                    <Link
+                      to={link.path}
                       className="text-base font-medium text-black transition hover:underline"
                     >
-                      {link}
-                    </a>
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
 
               {column.cta && (
-                <a
-                  href="#"
+                <Link
+                  to={column.ctaPath}
                   className="mt-24 inline-flex items-center gap-2 text-base font-semibold text-black transition lg:mt-28"
                 >
                   <span className="hover:underline">{column.cta}</span>
                   <span aria-hidden="true">&rarr;</span>
-                </a>
+                </Link>
               )}
             </nav>
           ))}

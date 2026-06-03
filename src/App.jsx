@@ -8,6 +8,9 @@ import Home from "./pages/Home";
 import ContactSales from "./pages/ContactSales";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
+import HelpCenter from "./pages/HelpCenter";
+import About from "./pages/About";
+import Security from "./pages/security";
 function App() {
   const location = useLocation();
   const showMarketingLayout = location.pathname !== "/dashboard";
@@ -21,8 +24,11 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/contact-sales" element={<ContactSales />} />
-        <Route path="privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="terms-and-conditions" element={<TermsConditions />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-and-conditions" element={<TermsConditions />} />
+        <Route path="/help" element={<HelpCenter />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/security" element={<Security />} />
       </Routes>
       {showMarketingLayout && <Footer />}
     </>

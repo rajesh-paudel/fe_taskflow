@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Zap, CheckCircle2, ArrowRight, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function ContactSales() {
   const [formData, setFormData] = useState({
@@ -296,9 +297,12 @@ export default function ContactSales() {
               You may unsubscribe from receiving marketing communications any
               time. TaskFlow's websites and communication pipelines are strictly
               subject to our{" "}
-              <a href="#privacy" className="underline hover:text-gray-600">
+              <Link
+                to="/privacy-policy"
+                className="underline hover:text-gray-600"
+              >
                 Privacy Policy
-              </a>
+              </Link>
               .
             </p>
           </form>
@@ -313,12 +317,12 @@ export default function ContactSales() {
                 support@taskflow.com
               </a>{" "}
               or visit our{" "}
-              <a
-                href="#help"
+              <Link
+                to="/help"
                 className="text-blue-600 hover:text-gray-700 underline"
               >
                 Help Center
-              </a>
+              </Link>
               .
             </p>
           </div>

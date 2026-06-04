@@ -91,7 +91,7 @@ export default function ProjectsSheet({
                 key={project.id}
                 className="group relative rounded-xl border border-neutral-200/75 bg-white p-4 flex flex-col justify-between hover:border-neutral-400 shadow-3xs hover:shadow-2xs transition-all"
               >
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {/* Top Header Card Info */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
@@ -104,7 +104,7 @@ export default function ProjectsSheet({
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-neutral-400 line-clamp-2 leading-relaxed">
+                  <p className="text-[11px] mb-4 text-neutral-400 line-clamp-2 leading-relaxed">
                     {project.desc ||
                       "No custom manifest summary specified for this corporate roadmap sector allocation."}
                   </p>
@@ -118,8 +118,18 @@ export default function ProjectsSheet({
                   </div>
                 </div>
 
+                {/* Modern Progress Bar Track */}
+                <div className="w-full mt-3 h-1.5 bg-neutral-100 border border-neutral-200/50 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#5A24CA] rounded-full transition-all duration-500 ease-out"
+                    style={{
+                      width: `${stats.total > 0 ? (stats.completed / stats.total) * 100 : 0}%`,
+                    }}
+                  />
+                </div>
+
                 {/* Team Avatars Block & Interactivity Footer */}
-                <div className="mt-5 pt-3 border-t border-neutral-100 flex items-center justify-between gap-2">
+                <div className="mt-3 pt-3  flex items-center justify-between gap-2">
                   <div className="flex items-center -space-x-1.5 overflow-hidden">
                     {mockTeamAvatars.map((avatar, idx) => (
                       <div

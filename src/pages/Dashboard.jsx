@@ -20,6 +20,7 @@ import DashboardSidebar from "../components/dashboard/DashboardSidebar";
 import TasksSheet from "../components/dashboard/TasksSheet";
 import PlaceholdersSheet from "../components/dashboard/PlaceholdersSheet";
 import ProjectsSheet from "../components/dashboard/ProjectsSheet";
+import OverviewSheet from "../components/dashboard/OverviewSheet";
 
 //navigation  items for the sidebar so to control the worksheet
 const structuralMenuItems = [
@@ -88,14 +89,10 @@ export default function Dashboard() {
   ]);
 
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("overview");
   const [activeProject, setActiveProject] = useState(null);
   const [viewType, setViewType] = useState("board");
 
-  // Form states for the unified top creator engine
-  const [newTaskTitle, setNewTaskTitle] = useState("");
-  const [newTaskPriority, setNewTaskPriority] = useState("Medium");
-  const [newTaskStatus, setNewTaskStatus] = useState("To Do");
   const [selectedProjectId, setSelectedProjectId] = useState("p1");
 
   const getHeaderTitle = () => {
@@ -144,7 +141,6 @@ export default function Dashboard() {
           onCreateTask={handleCreateTask}
           activeProject={activeProject}
           viewType={viewType}
-          newTaskTitle={newTaskTitle}
           setNewTaskTitle={setNewTaskTitle}
           selectedProjectId={selectedProjectId}
           setSelectedProjectId={setSelectedProjectId}
@@ -162,8 +158,9 @@ export default function Dashboard() {
 
     // 2. Routing logic handled conditionally based on core selected sidebar tabs
     switch (activeTab) {
-      case "dashboard":
       case "overview":
+        return <OverviewSheet />;
+      case "project":
         return (
           <ProjectsSheet
             projects={projects}
@@ -180,14 +177,8 @@ export default function Dashboard() {
             onCreateTask={handleCreateTask}
             activeProject={activeProject}
             viewType={viewType}
-            newTaskTitle={newTaskTitle}
-            setNewTaskTitle={setNewTaskTitle}
             selectedProjectId={selectedProjectId}
             setSelectedProjectId={setSelectedProjectId}
-            newTaskStatus={newTaskStatus}
-            setNewTaskStatus={setNewTaskStatus}
-            newTaskPriority={newTaskPriority}
-            setNewTaskPriority={setNewTaskPriority}
             projects={projects}
             filteredTasks={filteredTasks}
             handleUpdateTaskStatus={handleUpdateTaskStatus}
@@ -269,7 +260,7 @@ export default function Dashboard() {
 
         {/* Primary Display Work Surface Canvas Container Area */}
         <div className="flex-1 overflow-auto p-6 md:p-8 bg-white">
-          <div className="mx-auto max-w-5xl space-y-6">
+          <div className="mx-auto max-w-6xl space-y-6">
             {/* Dynamic Context Breadcrumb Display Header Title text */}
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 font-mono">

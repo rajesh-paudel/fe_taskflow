@@ -1,12 +1,12 @@
 import React from "react";
 import { FaColumns, FaListUl, FaShareAlt } from "react-icons/fa";
-
-// Import broken-down component sub-sheet layers
 import TasksSheet from "./TasksSheet";
 import PlaceholdersSheet from "./PlaceholdersSheet";
 import ProjectsSheet from "./ProjectsSheet";
 
 export default function DashboardWorksheet({
+  tasks,
+  onCreateTask,
   activeTab,
   setActiveTab,
   activeProject,
@@ -24,7 +24,7 @@ export default function DashboardWorksheet({
   setNewTaskPriority,
   projects,
   filteredTasks,
-  handleCreateTaskUnified,
+
   handleUpdateTaskStatus,
   handleDeleteTask,
   setIsProjectModalOpen,
@@ -35,6 +35,8 @@ export default function DashboardWorksheet({
     if (activeProject) {
       return (
         <TasksSheet
+          tasks={tasks}
+          onCreateTasks={onCreateTasks}
           activeProject={activeProject}
           viewType={viewType}
           newTaskTitle={newTaskTitle}
@@ -47,7 +49,6 @@ export default function DashboardWorksheet({
           setNewTaskPriority={setNewTaskPriority}
           projects={projects}
           filteredTasks={filteredTasks}
-          handleCreateTaskUnified={handleCreateTaskUnified}
           handleUpdateTaskStatus={handleUpdateTaskStatus}
           handleDeleteTask={handleDeleteTask}
         />
@@ -61,7 +62,7 @@ export default function DashboardWorksheet({
         return (
           <ProjectsSheet
             projects={projects}
-            tasks={filteredTasks}
+            tasks={tasks}
             setIsProjectModalOpen={setIsProjectModalOpen}
             setActiveProject={setActiveProject}
             setActiveTab={setActiveTab}
@@ -70,6 +71,8 @@ export default function DashboardWorksheet({
       case "tasks":
         return (
           <TasksSheet
+            tasks={tasks}
+            onCreateTask={onCreateTask}
             activeProject={activeProject}
             viewType={viewType}
             newTaskTitle={newTaskTitle}
@@ -82,7 +85,6 @@ export default function DashboardWorksheet({
             setNewTaskPriority={setNewTaskPriority}
             projects={projects}
             filteredTasks={filteredTasks}
-            handleCreateTaskUnified={handleCreateTaskUnified}
             handleUpdateTaskStatus={handleUpdateTaskStatus}
             handleDeleteTask={handleDeleteTask}
           />

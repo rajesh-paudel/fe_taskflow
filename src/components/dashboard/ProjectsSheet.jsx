@@ -102,10 +102,6 @@ export default function ProjectsSheet({
                         {project.name}
                       </h3>
                     </div>
-                    {/* Hardcoded Premium Visual Tags */}
-                    <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-neutral-100 text-neutral-500 font-mono">
-                      {project.id === "p1" ? "Production" : "Active"}
-                    </span>
                   </div>
 
                   <p className="text-[11px] text-neutral-400 line-clamp-2 leading-relaxed">

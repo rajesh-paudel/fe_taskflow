@@ -3,7 +3,10 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({
+    name: "rajesh paudel",
+    email: "rajeshpaudel9863@gmail.com",
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   // useEffect(() => {

@@ -21,6 +21,8 @@ import TasksSheet from "../components/dashboard/TasksSheet";
 import PlaceholdersSheet from "../components/dashboard/PlaceholdersSheet";
 import ProjectsSheet from "../components/dashboard/ProjectsSheet";
 import OverviewSheet from "../components/dashboard/OverviewSheet";
+import ChatSheet from "../components/dashboard/ChatSheet";
+import CalenderSheet from "../components/dashboard/CalenderSheet";
 
 //navigation  items for the sidebar so to control the worksheet
 const structuralMenuItems = [
@@ -55,7 +57,7 @@ export default function Dashboard() {
       desc: "Q3 campaign rollout",
     },
   ]);
-
+  console.log(projects);
   // Master Relational Task Collection
   const [tasks, setTasks] = useState([
     {
@@ -92,7 +94,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [activeProject, setActiveProject] = useState(null);
   const [viewType, setViewType] = useState("board");
-
+  const [editingProject, setEditingProject] = useState(null);
   const [selectedProjectId, setSelectedProjectId] = useState("p1");
 
   const getHeaderTitle = () => {
@@ -103,8 +105,18 @@ export default function Dashboard() {
     return currentItem ? currentItem.label : "Dashboard Home Overview";
   };
 
-  const handleAddProject = (newProjectObj) => {
-    setProjects((prevProjects) => [...prevProjects, newProjectObj]);
+  const handleSaveOrUpdateProject = (projectPayload) => {
+    const projectExists = projects.some((p) => p.id === projectPayload.id);
+
+    if (projectExists) {
+      // Mode: Update state safely map matrix layout array updates
+      setProjects(
+        projects.map((p) => (p.id === projectPayload.id ? projectPayload : p)),
+      );
+    } else {
+      // Mode: Create completely fresh data entry allocation array insert
+      setProjects([...projects, projectPayload]);
+    }
   };
 
   const handleCreateTask = (newTask) => {
@@ -118,8 +130,6 @@ export default function Dashboard() {
     if (activeTab === "projects") return true;
     return false;
   });
-
-  // Centralized Create Action Handler
 
   const handleUpdateTaskStatus = (taskId, nextStatus) => {
     setTasks((prev) =>
@@ -193,6 +203,7 @@ export default function Dashboard() {
         // Graceful fallback to Project Dashboard Overview list
         return (
           <ProjectsSheet
+            setEditingProject={setEditingProject}
             projects={projects}
             tasks={filteredTasks}
             setIsProjectModalOpen={setIsProjectModalOpen}
@@ -289,9 +300,13 @@ export default function Dashboard() {
       </main>
 
       <CreateProjectModal
+        editingProject={editingProject}
         isOpen={isProjectModalOpen}
-        onClose={() => setIsProjectModalOpen(false)}
-        onCreateProject={handleAddProject}
+        onClose={() => {
+          setEditingProject(null);
+          setIsProjectModalOpen(false);
+        }}
+        onCreateProject={handleSaveOrUpdateProject}
       />
     </div>
   );

@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaTimes, FaFolder, FaAlignLeft, FaPalette } from "react-icons/fa";
-
+import { useAuth } from "../../context/AuthContext";
 export default function CreateProjectModal({
+  editingProject,
   isOpen,
   onClose,
   onCreateProject,
 }) {
+  const { user } = useAuth();
   // Local form control states
   const [projectName, setProjectName] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
@@ -20,7 +22,22 @@ export default function CreateProjectModal({
     { id: "bg-amber-500", label: "Amber Gold" },
     { id: "bg-neutral-500", label: "Slate Gray" },
   ];
-
+  // Sync modal form state with the operation mode (Create vs. Edit)
+  useEffect(() => {
+    if (isOpen) {
+      if (editingProject) {
+        // Mode: Edit Project — Pre-populate form inputs
+        setProjectName(editingProject.name || "");
+        setProjectDesc(editingProject.desc || "");
+        setSelectedColor(editingProject.color || "bg-blue-500");
+      } else {
+        // Mode: Create Project — Flush state back to pristine default values
+        setProjectName("");
+        setProjectDesc("");
+        setSelectedColor("bg-blue-500");
+      }
+    }
+  }, [editingProject, isOpen]);
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
@@ -28,14 +45,15 @@ export default function CreateProjectModal({
     if (!projectName.trim()) return;
 
     // Package the detailed data object
-    const newProject = {
-      id: `p_${Date.now()}`, // Generate unique standard ID token
+    const projectPayload = {
+      id: editingProject ? editingProject.id : `p_${Date.now()}`,
+      owner: editingProject ? editingProject.owner : user?.id,
       name: projectName.trim(),
       desc: projectDesc.trim(),
       color: selectedColor,
     };
 
-    onCreateProject(newProject);
+    onCreateProject(projectPayload);
 
     // Reset local form states and close modal layer
     setProjectName("");

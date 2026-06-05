@@ -6,7 +6,10 @@ import {
   FaTasks,
   FaUsers,
   FaArrowRight,
+  FaEdit,
+  FaTrashAlt,
 } from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
 
 export default function ProjectsSheet({
   projects = [],
@@ -14,8 +17,9 @@ export default function ProjectsSheet({
   setIsProjectModalOpen,
   setActiveProject,
   setActiveTab,
+  setEditingProject,
 }) {
-  const [projectLayoutMode, setProjectLayoutMode] = useState("grid"); // Local toggle underneath header
+  const [projectLayoutMode, setProjectLayoutMode] = useState("grid"); //grid and list
 
   // Helper utility to safely count tasks mapping to explicit project structures
   const getProjectTaskStats = (projectId) => {
@@ -26,7 +30,10 @@ export default function ProjectsSheet({
       completed: completed,
     };
   };
-
+  const handleEditProject = (project) => {
+    setEditingProject(project);
+    setIsProjectModalOpen(true);
+  };
   // Mock team members generation architecture matching your layout blueprint requirements
   const mockTeamAvatars = [
     { text: "RP", bg: "bg-neutral-950" },
@@ -85,26 +92,61 @@ export default function ProjectsSheet({
         /* GRID LAYOUT VIEW */
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => {
+            const { user } = useAuth();
+            const isOwner = user?.id === project.owner;
             const stats = getProjectTaskStats(project.id);
             return (
               <div
                 key={project.id}
-                className="group relative rounded-xl border border-neutral-200/75 bg-white p-4 flex flex-col justify-between hover:border-neutral-400 shadow-3xs hover:shadow-2xs transition-all"
+                className="group relative rounded-xl border border-neutral-200/75 bg-white p-4 flex flex-col justify-between hover:border-neutral-400 shadow-3xs hover:shadow-2xs transition-all duration-300"
               >
+                {/* ⚙️ ABSOLUTE ACTION BUTTONS CONTAINER (Visible on Hover for Owners only) */}
+                {isOwner && (
+                  <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditProject(project); // Define your edit handler function
+                      }}
+                      title="Edit Project Space"
+                      className="w-6 h-6 border border-neutral-200 bg-white text-neutral-500 hover:text-neutral-900 rounded-md flex items-center justify-center transition-all shadow-3xs cursor-pointer hover:border-neutral-300"
+                    >
+                      <FaEdit size={10} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteProject(project.id); // Define your global delete dialog trigger
+                      }}
+                      title="Delete Project Space"
+                      className="w-6 h-6 border border-neutral-100 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-md flex items-center justify-center transition-all shadow-3xs cursor-pointer"
+                    >
+                      <FaTrashAlt size={10} />
+                    </button>
+                  </div>
+                )}
+
                 <div className="space-y-1">
                   {/* Top Header Card Info */}
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 max-w-[70%]">
                       <span
-                        className={`w-2.5 h-2.5 rounded-full ${project.color || "bg-neutral-400"}`}
+                        className={`w-2.5 h-2.5 rounded-full shrink-0 ${project.color || "bg-neutral-400"}`}
                       />
-                      <h3 className="text-xs font-bold text-neutral-950 truncate max-w-[140px]">
+                      <h3 className="text-xs font-bold text-neutral-950 truncate">
                         {project.name}
                       </h3>
                     </div>
+
+                    {/* 👑 CONTEXTUAL OWNER TAG BADGE (Pushed to left of buttons if hovered) */}
+                    {isOwner && (
+                      <span className="text-[9px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded bg-purple-50 border border-purple-100/70 text-[#5A24CA] font-mono select-none transition-all group-hover:mr-14">
+                        Owner
+                      </span>
+                    )}
                   </div>
 
-                  <p className="text-[11px] mb-4 text-neutral-400 line-clamp-2 leading-relaxed">
+                  <p className="text-[11px] mt-1 mb-4 text-neutral-400 line-clamp-2 leading-relaxed">
                     {project.desc ||
                       "No custom manifest summary specified for this corporate roadmap sector allocation."}
                   </p>
@@ -129,7 +171,7 @@ export default function ProjectsSheet({
                 </div>
 
                 {/* Team Avatars Block & Interactivity Footer */}
-                <div className="mt-3 pt-3  flex items-center justify-between gap-2">
+                <div className="mt-3 pt-3 border-t border-neutral-100/60 flex items-center justify-between gap-2">
                   <div className="flex items-center -space-x-1.5 overflow-hidden">
                     {mockTeamAvatars.map((avatar, idx) => (
                       <div
@@ -147,7 +189,7 @@ export default function ProjectsSheet({
 
                   <button
                     onClick={() => handleDrilldown(project)}
-                    className="inline-flex items-center gap-1 text-[10px] font-bold text-neutral-400 group-hover:text-neutral-950 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1 text-[10px] font-bold text-neutral-400 group-hover:text-neutral-950 transition-colors cursor-pointer select-none"
                   >
                     <span>Explore Space</span>
                     <FaArrowRight size={8} />
@@ -161,44 +203,86 @@ export default function ProjectsSheet({
         /* COMPACT LIST ROW VIEW */
         <div className="border border-neutral-200/80 rounded-xl overflow-hidden bg-white shadow-3xs divide-y divide-neutral-100">
           {projects.map((project) => {
+            const { user } = useAuth();
+            const isOwner = user?.id === project.owner;
             const stats = getProjectTaskStats(project.id);
+
             return (
               <div
                 key={project.id}
+                className="relative flex flex-col sm:flex-row sm:items-center justify-between p-3.5 hover:bg-neutral-50/50 cursor-pointer gap-3 text-xs"
                 onClick={() => handleDrilldown(project)}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 hover:bg-neutral-50/50 transition-colors cursor-pointer gap-3 text-xs"
               >
+                {/* Column 1: Project Identity */}
                 <div className="flex items-center gap-3 min-w-0">
                   <span
                     className={`w-2.5 h-2.5 rounded-full shrink-0 ${project.color || "bg-neutral-400"}`}
                   />
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex items-center gap-2">
                     <p className="font-bold text-neutral-900 truncate">
                       {project.name}
                     </p>
-                    <p className="text-[10px] text-neutral-400 truncate max-w-md">
-                      {project.desc || "No descriptor allocated."}
-                    </p>
+                    {/* 👑 CONTEXTUAL OWNER TAG BADGE */}
+                    {isOwner && (
+                      <span className="text-[8px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded bg-purple-50 border border-purple-100/70 text-[#5A24CA] font-mono select-none">
+                        Owner
+                      </span>
+                    )}
                   </div>
                 </div>
 
+                {/* Description Block */}
+                <p className="text-[10px] text-neutral-400 truncate max-w-sm sm:max-w-xs md:max-w-md hidden sm:block">
+                  {project.desc || "No custom manifest summary specified."}
+                </p>
+
+                {/* Column 2: Tasks, Team Matrix & Static Action Buttons */}
                 <div className="flex items-center gap-4 justify-between sm:justify-end shrink-0">
-                  <span className="text-[10px] font-mono text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded font-bold">
-                    {stats.total} Total Tasks
+                  {/* Clean Metric Counter Badge */}
+                  <span className="text-[10px] font-mono text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded font-bold whitespace-nowrap">
+                    {stats.completed}/{stats.total} Completed
                   </span>
 
-                  {/* Avatar Overflow Strip */}
-                  <div className="flex items-center -space-x-1">
-                    <div className="w-5 h-5 rounded-full bg-neutral-950 text-[7px] font-black text-white flex items-center justify-center font-mono">
-                      RP
-                    </div>
-                    <div className="w-5 h-5 rounded-full bg-blue-600 text-[7px] font-black text-white flex items-center justify-center font-mono">
-                      JB
-                    </div>
-                    <div className="w-5 h-5 rounded-full bg-neutral-200 text-neutral-500 text-[7px] font-bold flex items-center justify-center font-mono">
-                      +9
+                  {/* Dynamic Avatar Overflow Strip */}
+                  <div className="flex items-center -space-x-1.5">
+                    {mockTeamAvatars.slice(0, 2).map((avatar, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-5 h-5 rounded-full border border-white text-[7px] font-black text-white flex items-center justify-center ${avatar.bg} shrink-0 select-none font-mono`}
+                      >
+                        {avatar.text}
+                      </div>
+                    ))}
+                    <div className="w-5 h-5 rounded-full border border-white bg-neutral-100 text-neutral-500 text-[7px] font-bold flex items-center justify-center shrink-0 font-mono select-none">
+                      +8
                     </div>
                   </div>
+
+                  {/* ⚙️ STATIC ACTION BUTTONS (Always Visible for Owners inline) */}
+                  {isOwner && (
+                    <div className="flex items-center gap-1 z-20 pl-1 border-l border-neutral-200">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevents drilldown trigger
+                          handleEditProject(project);
+                        }}
+                        title="Edit Project Space"
+                        className="w-5 h-5 border border-neutral-200 bg-white text-neutral-500 hover:text-neutral-900 rounded-md flex items-center justify-center shadow-3xs cursor-pointer hover:border-neutral-300"
+                      >
+                        <FaEdit size={9} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevents drilldown trigger
+                          handleDeleteProject(project.id);
+                        }}
+                        title="Delete Project Space"
+                        className="w-5 h-5 border border-neutral-100 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-md flex items-center justify-center shadow-3xs cursor-pointer"
+                      >
+                        <FaTrashAlt size={9} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );

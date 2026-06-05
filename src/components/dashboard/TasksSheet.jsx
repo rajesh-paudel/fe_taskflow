@@ -29,7 +29,7 @@ export default function TasksSheet({
   handleUpdateTaskStatus,
   handleDeleteTask,
 }) {
-  // 💡 LOCAL VIEW STATE: Toggles cleanly between board, list, and gantt
+  //  LOCAL VIEW STATE: Toggles cleanly between board, list, and gantt
   const [localViewType, setLocalViewType] = useState("board");
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [emailInput, setEmailInput] = useState("");

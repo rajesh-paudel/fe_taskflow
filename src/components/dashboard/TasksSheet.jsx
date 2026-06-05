@@ -8,31 +8,26 @@ import {
   FaUserPlus,
   FaTimes,
   FaStream,
+  FaEdit,
 } from "react-icons/fa";
 import CreateTaskModal from "./createTaskModal";
 
 export default function TasksSheet({
   tasks,
   onCreateTask,
-  activeProject,
-  newTaskTitle,
-  setNewTaskTitle,
-  selectedProjectId,
-  setSelectedProjectId,
-  newTaskStatus,
-  setNewTaskStatus,
-  newTaskPriority,
-  setNewTaskPriority,
   projects,
   filteredTasks,
-
   handleUpdateTaskStatus,
   handleDeleteTask,
+  handleEditTask, // Ensure this hook is handled by your upstream task array state layer
 }) {
-  //  LOCAL VIEW STATE: Toggles cleanly between board, list, and gantt
+  // LOCAL VIEW STATE
   const [localViewType, setLocalViewType] = useState("board");
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-  const [emailInput, setEmailInput] = useState("");
+  const [editingTaskPayload, setEditingTaskPayload] = useState(null);
+
+  // Confirmation Delete States
+  const [deleteConfirmationId, setDeleteConfirmationId] = useState(null);
 
   const kanbanColumns = [
     { key: "To Do", label: "To Do" },
@@ -40,27 +35,29 @@ export default function TasksSheet({
     { key: "Done", label: "Completed" },
   ];
 
-  // Static timeline columns representing a 7-day sprint block layout for the Gantt matrix
   const timelineDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-  const handleAddEmailTag = () => {
-    const cleanEmail = emailInput.trim().toLowerCase();
-    if (cleanEmail && !newTaskAssignees.includes(cleanEmail)) {
-      setNewTaskAssignees([...newTaskAssignees, cleanEmail]);
-      setEmailInput("");
-    }
-  };
-
-  const handleRemoveEmailTag = (emailToRemove) => {
-    setNewTaskAssignees(
-      newTaskAssignees.filter((email) => email !== emailToRemove),
-    );
-  };
 
   const formatCardDate = (dateStr) => {
     if (!dateStr) return "";
     const d = new Date(dateStr);
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
+  const triggerOpenCreateMode = () => {
+    setEditingTaskPayload(null);
+    setIsTaskModalOpen(true);
+  };
+
+  const triggerOpenEditMode = (task) => {
+    setEditingTaskPayload(task);
+    setIsTaskModalOpen(true);
+  };
+
+  const executeConfirmedDeletion = () => {
+    if (deleteConfirmationId) {
+      handleDeleteTask(deleteConfirmationId);
+      setDeleteConfirmationId(null);
+    }
   };
 
   return (
@@ -69,7 +66,6 @@ export default function TasksSheet({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-200 pb-3 gap-3">
         <div className="flex items-center gap-5 text-xs font-semibold text-neutral-400">
           {["List", "Grid", "Calendar", "Gantt", "Kanban"].map((tabName) => {
-            // Map tabs to their rendering layout tokens
             const layoutKey =
               tabName === "Kanban"
                 ? "board"
@@ -87,7 +83,7 @@ export default function TasksSheet({
                 type="button"
                 disabled={!layoutKey}
                 onClick={() => layoutKey && setLocalViewType(layoutKey)}
-                className={`transition-all pb-3 -mb-[13px] border-b-2 ${
+                className={`transition-colors pb-3 -mb-[13px] border-b-2 ${
                   !layoutKey
                     ? "opacity-30 cursor-not-allowed"
                     : "cursor-pointer"
@@ -106,8 +102,8 @@ export default function TasksSheet({
         <div className="flex items-center gap-2 justify-end">
           <button
             type="button"
-            onClick={() => setIsTaskModalOpen(true)}
-            className="inline-flex items-center gap-1.5 bg-[#5A24CA] hover:bg-[#4A1CA5] text-white font-bold text-xs px-3 py-1.5 rounded-lg transition-all shadow-3xs cursor-pointer"
+            onClick={triggerOpenCreateMode}
+            className="inline-flex items-center gap-1.5 bg-[#5A24CA] hover:bg-[#4A1CA5] text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow-3xs cursor-pointer"
           >
             <FaPlus size={10} />
             <span>Add New Task</span>
@@ -115,9 +111,8 @@ export default function TasksSheet({
         </div>
       </div>
 
-      {/* 📊 INTERCHANGE LAYOUT MATRIX RENDERING */}
+      {/* 📊 KANBAN BOARD VIEW LAYOUT */}
       {localViewType === "board" && (
-        /* KANBAN BOARD VIEW LAYOUT */
         <div className="grid gap-4 md:grid-cols-3 items-start pt-2">
           {kanbanColumns.map((col) => {
             const columnTasks = filteredTasks.filter(
@@ -160,19 +155,43 @@ export default function TasksSheet({
                       return (
                         <div
                           key={task.id}
-                          className="group bg-white rounded-xl border border-neutral-200 p-3.5 space-y-3 shadow-3xs hover:border-neutral-400 transition-all"
+                          className="bg-white rounded-xl border border-neutral-200 p-3.5 space-y-3 shadow-3xs"
                         >
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="text-xs font-bold text-neutral-950 leading-snug tracking-tight">
-                              {task.title}
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteTask(task.id)}
-                              className="text-neutral-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 p-0.5 transition-opacity cursor-pointer shrink-0"
-                            >
-                              <FaTrashAlt size={9} />
-                            </button>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 space-y-1">
+                              <p className="text-xs font-bold text-neutral-950 leading-snug tracking-tight break-words">
+                                {task.title}
+                              </p>
+                              {/* Parent Project Reference Badge */}
+                              <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-medium font-mono">
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full shrink-0 ${parentProj?.color || "bg-neutral-400"}`}
+                                />
+                                <span className="truncate">
+                                  {parentProj?.name || "Unassigned Space"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => triggerOpenEditMode(task)}
+                                className="text-neutral-400 hover:text-neutral-900 p-1 cursor-pointer"
+                                title="Edit Task"
+                              >
+                                <FaEdit size={10} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteConfirmationId(task.id)}
+                                className="text-neutral-400 hover:text-rose-600 p-1 cursor-pointer"
+                                title="Delete Task"
+                              >
+                                <FaTrashAlt size={9} />
+                              </button>
+                            </div>
                           </div>
 
                           {(task.startDate || task.dueDate) && (
@@ -192,21 +211,6 @@ export default function TasksSheet({
                               </span>
                             </div>
                           )}
-
-                          {task.assigneeEmails &&
-                            task.assigneeEmails.length > 0 && (
-                              <div className="flex flex-wrap gap-1 items-center pt-1">
-                                {task.assigneeEmails.map((email, idx) => (
-                                  <span
-                                    key={idx}
-                                    title={email}
-                                    className="text-[9px] px-1.5 py-0.5 font-bold tracking-tight bg-neutral-100 border border-neutral-200 rounded-sm text-neutral-600 truncate max-w-[100px]"
-                                  >
-                                    {email.split("@")[0]}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
 
                           <div className="flex items-center justify-between text-[10px] pt-1 border-t border-neutral-50">
                             <span
@@ -246,8 +250,7 @@ export default function TasksSheet({
 
       {/* 📊 GANTT VIEW TIMELINE LAYOUT SYSTEM */}
       {localViewType === "gantt" && (
-        <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white shadow-3xs animate-in fade-in duration-200">
-          {/* Gantt Matrix Operational Header */}
+        <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white shadow-3xs">
           <div className="bg-neutral-50/80 p-3.5 border-b border-neutral-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FaStream className="text-neutral-500" size={12} />
@@ -260,15 +263,13 @@ export default function TasksSheet({
             </span>
           </div>
 
-          {/* Core Gantt View Area Table Grid */}
           <div className="overflow-x-auto">
-            <div className="min-w-[760px] divide-y divide-neutral-100">
-              {/* Gantt Timeline Labels Row */}
+            <div className="min-w-[840px] divide-y divide-neutral-100">
               <div className="grid grid-cols-12 bg-neutral-50/40 text-[10px] font-bold text-neutral-400 uppercase tracking-wider text-center py-2">
-                <div className="col-span-4 text-left pl-4 self-center">
-                  Task Identity Target
+                <div className="col-span-5 text-left pl-4 self-center">
+                  Task Identity Matrix
                 </div>
-                <div className="col-span-8 grid grid-cols-7 border-l border-neutral-100">
+                <div className="col-span-7 grid grid-cols-7 border-l border-neutral-100">
                   {timelineDays.map((day, i) => (
                     <div
                       key={i}
@@ -280,21 +281,21 @@ export default function TasksSheet({
                 </div>
               </div>
 
-              {/* Gantt Project Tasks Row List */}
               {filteredTasks.length === 0 ? (
                 <div className="p-8 text-center text-xs text-neutral-400">
-                  No tracked data entries to map onto timeline coordinates.
+                  No tracked data entries available.
                 </div>
               ) : (
                 filteredTasks.map((task) => {
-                  // Elegant UI layout simulations: assign visual column offsets for Gantt rendering
+                  const parentProj = projects.find(
+                    (p) => p.id === task.projectId,
+                  );
                   const isHigh = task.priority === "High";
                   const isInProgress = task.status === "In Progress";
                   const isCompleted = task.status === "Done";
 
-                  // Dynamic Gantt span calculation logic simulation matching specific task status properties
                   let spanClass =
-                    "col-start-2 col-span-3 bg-amber-400/20 text-amber-800 border-amber-300"; // Default 'To Do' span positioning
+                    "col-start-2 col-span-3 bg-amber-400/20 text-amber-800 border-amber-300";
                   if (isInProgress)
                     spanClass =
                       "col-start-3 col-span-4 bg-[#5A24CA]/10 text-[#5A24CA] border-[#5A24CA]/20";
@@ -305,31 +306,46 @@ export default function TasksSheet({
                   return (
                     <div
                       key={task.id}
-                      className="grid grid-cols-12 items-center group hover:bg-neutral-50/40 transition-colors py-3"
+                      className="grid grid-cols-12 items-center py-3.5"
                     >
-                      {/* Left Column Label Block */}
-                      <div className="col-span-4 pl-4 pr-3 min-w-0">
-                        <p className="text-xs font-bold text-neutral-900 truncate leading-tight">
-                          {task.title}
-                        </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span
-                            className={`text-[8px] font-black tracking-wide uppercase ${isHigh ? "text-rose-600" : "text-neutral-400"}`}
+                      {/* Left Header Info Block Column */}
+                      <div className="col-span-5 pl-4 pr-3 flex items-center justify-between gap-3 min-w-0">
+                        <div className="min-w-0 space-y-0.5">
+                          <p className="text-xs font-bold text-neutral-900 truncate">
+                            {task.title}
+                          </p>
+                          {/* Project row identity attachment */}
+                          <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 font-medium font-mono">
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full shrink-0 ${parentProj?.color || "bg-neutral-400"}`}
+                            />
+                            <span className="truncate">
+                              {parentProj?.name || "Unassigned Space"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Statically displayed tracking operations row */}
+                        <div className="flex items-center gap-1 shrink-0 pr-2">
+                          <button
+                            type="button"
+                            onClick={() => triggerOpenEditMode(task)}
+                            className="text-neutral-400 hover:text-neutral-900 p-1 cursor-pointer"
                           >
-                            {task.priority} Priority
-                          </span>
-                          {task.assigneeEmails &&
-                            task.assigneeEmails.length > 0 && (
-                              <span className="text-[9px] text-neutral-400 truncate max-w-[120px]">
-                                • {task.assigneeEmails[0].split("@")[0]}
-                              </span>
-                            )}
+                            <FaEdit size={10} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeleteConfirmationId(task.id)}
+                            className="text-neutral-400 hover:text-rose-600 p-1 cursor-pointer"
+                          >
+                            <FaTrashAlt size={9} />
+                          </button>
                         </div>
                       </div>
 
-                      {/* Right Timeline Grid Lane Area */}
-                      <div className="col-span-8 grid grid-cols-7 h-full items-center border-l border-neutral-100 relative min-h-[36px]">
-                        {/* Elegant Timeline Vertical Background Grid Overlay Bars */}
+                      {/* Right Grid Gantt Lane Track Area */}
+                      <div className="col-span-7 grid grid-cols-7 h-full items-center border-l border-neutral-100 relative min-h-[36px]">
                         {Array(7)
                           .fill(0)
                           .map((_, idx) => (
@@ -340,9 +356,8 @@ export default function TasksSheet({
                             />
                           ))}
 
-                        {/* Interactive Dynamic Gantt Bar Item Component */}
                         <div
-                          className={`relative mx-2 p-1.5 rounded-lg border text-[10px] font-bold tracking-tight shadow-3xs truncate flex items-center justify-between transition-all ${spanClass}`}
+                          className={`relative mx-2 p-1.5 rounded-lg border text-[10px] font-bold tracking-tight shadow-3xs truncate flex items-center justify-between ${spanClass}`}
                         >
                           <span className="truncate">{task.status}</span>
                           <span className="text-[9px] font-mono opacity-80 shrink-0 ml-1">
@@ -361,7 +376,7 @@ export default function TasksSheet({
         </div>
       )}
 
-      {/* 📊 LIST VIEW FALLBACK COMPONENT */}
+      {/* 📊 LIST VIEW COMPONENT */}
       {localViewType === "list" && (
         <div className="border border-neutral-200/80 rounded-xl overflow-hidden bg-white shadow-3xs divide-y divide-neutral-100">
           {kanbanColumns.map((col) => {
@@ -373,31 +388,59 @@ export default function TasksSheet({
                 <div className="text-xs font-bold text-neutral-950 uppercase font-mono tracking-wider mb-2">
                   {col.label} Group
                 </div>
-                <div className="space-y-1.5">
-                  {columnTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="flex items-center justify-between p-2.5 rounded-lg border border-neutral-100 hover:border-neutral-200 bg-neutral-50/20 text-xs"
-                    >
-                      <span className="font-semibold text-neutral-800 truncate">
-                        {task.title}
-                      </span>
-                      <div className="flex items-center gap-3 ml-4 shrink-0">
-                        <span className="text-[10px] text-neutral-400">
-                          {task.dueDate
-                            ? formatCardDate(task.dueDate)
-                            : "No Due Date"}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="text-neutral-300 hover:text-rose-600 p-1 cursor-pointer"
-                        >
-                          <FaTrashAlt size={10} />
-                        </button>
+                <div className="space-y-2">
+                  {columnTasks.map((task) => {
+                    const parentProj = projects.find(
+                      (p) => p.id === task.projectId,
+                    );
+                    return (
+                      <div
+                        key={task.id}
+                        className="flex items-center justify-between p-3 rounded-xl border border-neutral-100 bg-neutral-50/20 text-xs gap-4"
+                      >
+                        <div className="min-w-0 space-y-0.5">
+                          <span className="font-semibold text-neutral-800 block truncate">
+                            {task.title}
+                          </span>
+                          {/* Project context row attachment tag */}
+                          <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 font-mono">
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full shrink-0 ${parentProj?.color || "bg-neutral-400"}`}
+                            />
+                            <span className="truncate">
+                              {parentProj?.name || "Unassigned Space"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-[10px] text-neutral-400 font-mono">
+                            {task.dueDate
+                              ? formatCardDate(task.dueDate)
+                              : "No Due Date"}
+                          </span>
+                          <div className="flex items-center gap-0.5">
+                            <button
+                              type="button"
+                              onClick={() => triggerOpenEditMode(task)}
+                              className="text-neutral-400 hover:text-neutral-900 p-1 cursor-pointer"
+                              title="Edit Task"
+                            >
+                              <FaEdit size={11} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteConfirmationId(task.id)}
+                              className="text-neutral-400 hover:text-rose-600 p-1 cursor-pointer"
+                              title="Delete Task"
+                            >
+                              <FaTrashAlt size={10} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -405,14 +448,52 @@ export default function TasksSheet({
         </div>
       )}
 
-      {/* 🧱 PREMIUM TASK CREATOR MODAL LAYER */}
+      {/* 🧱 PREMIUM TASK UPDATE/CREATOR MODAL LAYER */}
       {isTaskModalOpen && (
         <CreateTaskModal
           isTaskModalOpen={isTaskModalOpen}
           setIsTaskModalOpen={setIsTaskModalOpen}
           projects={projects}
           onCreateTask={onCreateTask}
+          editingTask={editingTaskPayload} // Pass down editing target payload context
         />
+      )}
+
+      {/* ⚠️ INTEGRATED DELETION CONFIRMATION DIALOG MODAL */}
+      {deleteConfirmationId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-100">
+          <div
+            className="absolute inset-0 bg-neutral-950/40 backdrop-blur-xs"
+            onClick={() => setDeleteConfirmationId(null)}
+          />
+          <div className="relative bg-white rounded-2xl p-5 w-full max-w-sm border border-neutral-200/70 shadow-xl z-10 space-y-4">
+            <div className="space-y-1.5">
+              <h4 className="text-sm font-black text-neutral-950 tracking-tight">
+                Permanently scrap task workspace target?
+              </h4>
+              <p className="text-[11px] text-neutral-400 leading-normal">
+                This item will be dropped from all system timelines and metrics
+                records immediately. This operation cannot be reversed.
+              </p>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmationId(null)}
+                className="px-3 py-1.5 text-xs font-bold text-neutral-500 hover:text-neutral-950 hover:bg-neutral-100 rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeConfirmedDeletion}
+                className="px-3.5 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-3xs cursor-pointer"
+              >
+                Delete Task
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

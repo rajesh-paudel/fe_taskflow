@@ -10,7 +10,7 @@ import {
   FaTrashAlt,
 } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
-
+import ConfirmationModal from "../ConfirmationModal";
 export default function ProjectsSheet({
   projects = [],
   tasks = [],
@@ -18,9 +18,11 @@ export default function ProjectsSheet({
   setActiveProject,
   setActiveTab,
   setEditingProject,
+  onDelete,
 }) {
+  const { user } = useAuth();
   const [projectLayoutMode, setProjectLayoutMode] = useState("grid"); //grid and list
-
+  const [deleteProjectId, setDeleteProjectId] = useState(null);
   // Helper utility to safely count tasks mapping to explicit project structures
   const getProjectTaskStats = (projectId) => {
     const projectSubTasks = tasks.filter((t) => t.projectId === projectId);
@@ -41,11 +43,11 @@ export default function ProjectsSheet({
     { text: "AA", bg: "bg-emerald-600" },
   ];
 
-  const handleDrilldown = (project) => {
-    setActiveProject(project);
-    setActiveTab(null);
+  const handleDeleteProject = () => {
+    if (!deleteProjectId) return null;
+    onDelete?.(deleteProjectId);
+    setDeleteProjectId(null);
   };
-
   return (
     <div className="space-y-6">
       {/* Sub-Header Dynamic Options Block */}
@@ -92,7 +94,6 @@ export default function ProjectsSheet({
         /* GRID LAYOUT VIEW */
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => {
-            const { user } = useAuth();
             const isOwner = user?.id === project.owner;
             const stats = getProjectTaskStats(project.id);
             return (
@@ -116,7 +117,7 @@ export default function ProjectsSheet({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteProject(project.id); // Define your global delete dialog trigger
+                        setDeleteProjectId(project.id); // Define your global delete dialog trigger
                       }}
                       title="Delete Project Space"
                       className="w-6 h-6 border border-neutral-100 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-md flex items-center justify-center transition-all shadow-3xs cursor-pointer"
@@ -187,10 +188,7 @@ export default function ProjectsSheet({
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleDrilldown(project)}
-                    className="inline-flex items-center gap-1 text-[10px] font-bold text-neutral-400 group-hover:text-neutral-950 transition-colors cursor-pointer select-none"
-                  >
+                  <button className="inline-flex items-center gap-1 text-[10px] font-bold text-neutral-400 group-hover:text-neutral-950 transition-colors cursor-pointer select-none">
                     <span>Explore Space</span>
                     <FaArrowRight size={8} />
                   </button>
@@ -203,7 +201,6 @@ export default function ProjectsSheet({
         /* COMPACT LIST ROW VIEW */
         <div className="border border-neutral-200/80 rounded-xl overflow-hidden bg-white shadow-3xs divide-y divide-neutral-100">
           {projects.map((project) => {
-            const { user } = useAuth();
             const isOwner = user?.id === project.owner;
             const stats = getProjectTaskStats(project.id);
 
@@ -211,7 +208,6 @@ export default function ProjectsSheet({
               <div
                 key={project.id}
                 className="relative flex flex-col sm:flex-row sm:items-center justify-between p-3.5 hover:bg-neutral-50/50 cursor-pointer gap-3 text-xs"
-                onClick={() => handleDrilldown(project)}
               >
                 {/* Column 1: Project Identity */}
                 <div className="flex items-center gap-3 min-w-0">
@@ -274,7 +270,7 @@ export default function ProjectsSheet({
                       <button
                         onClick={(e) => {
                           e.stopPropagation(); // Prevents drilldown trigger
-                          handleDeleteProject(project.id);
+                          setDeleteProjectId(project.id);
                         }}
                         title="Delete Project Space"
                         className="w-5 h-5 border border-neutral-100 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-md flex items-center justify-center shadow-3xs cursor-pointer"
@@ -289,6 +285,16 @@ export default function ProjectsSheet({
           })}
         </div>
       )}
+
+      {/* delete confirmation modal */}
+      <ConfirmationModal
+        isOpen={Boolean(deleteProjectId)}
+        onClose={() => setDeleteProjectId(null)}
+        onConfirm={handleDeleteProject}
+        title="confirm Action"
+        description="Are you sure you want to delete this project permanently? This operation cannot be undone. "
+        confirmText="Delete"
+      />
     </div>
   );
 }

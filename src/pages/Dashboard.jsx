@@ -13,6 +13,7 @@ import {
   FaColumns,
   FaListUl,
   FaShareAlt,
+  FaCalendar,
 } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import CreateProjectModal from "../components/dashboard/CreateProjectModal";
@@ -30,7 +31,7 @@ const structuralMenuItems = [
   { id: "projects", label: "Projects", icon: FaFolder },
   { id: "tasks", label: "Tasks", icon: FaCheckCircle },
   { id: "meetings", label: "Meetings", icon: FaVideo },
-  { id: "timesheet", label: "Timesheet", icon: FaClock },
+  { id: "calender", label: "Calender", icon: FaCalendar },
   { id: "chat", label: "Chat", icon: FaComments },
 ];
 export default function Dashboard() {
@@ -57,7 +58,7 @@ export default function Dashboard() {
       desc: "Q3 campaign rollout",
     },
   ]);
-  console.log(projects);
+
   // Master Relational Task Collection
   const [tasks, setTasks] = useState([
     {
@@ -90,12 +91,14 @@ export default function Dashboard() {
     },
   ]);
 
+  //for creating new project
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+
+  //handles active tab in sidebar inorder to control worksheet
   const [activeTab, setActiveTab] = useState("overview");
-  const [activeProject, setActiveProject] = useState(null);
-  const [viewType, setViewType] = useState("board");
+
+  //handles project to be edited
   const [editingProject, setEditingProject] = useState(null);
-  const [selectedProjectId, setSelectedProjectId] = useState("p1");
 
   const getHeaderTitle = () => {
     if (activeProject) return activeProject.name;
@@ -105,6 +108,7 @@ export default function Dashboard() {
     return currentItem ? currentItem.label : "Dashboard Home Overview";
   };
 
+  //save or update a project
   const handleSaveOrUpdateProject = (projectPayload) => {
     const projectExists = projects.some((p) => p.id === projectPayload.id);
 
@@ -119,18 +123,20 @@ export default function Dashboard() {
     }
   };
 
+  //creating a task
   const handleCreateTask = (newTask) => {
     setTasks((prev) => [...prev, newTask]);
   };
+
   // Pipeline Filtering Architecture
   const filteredTasks = tasks.filter((task) => {
-    if (activeProject) return task.projectId === activeProject.id;
     if (activeTab === "tasks") return true;
     if (activeTab === "dashboard") return true;
     if (activeTab === "projects") return true;
     return false;
   });
 
+  //updating the task status
   const handleUpdateTaskStatus = (taskId, nextStatus) => {
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, status: nextStatus } : t)),
@@ -141,43 +147,24 @@ export default function Dashboard() {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
+  const handleDeleteProject = (projectId) => {
+    setProjects((prev) => prev.filter((p) => p.id !== projectId));
+  };
   // Central Dynamic Sheet Router Logic
   const renderActiveWorkspaceSheet = () => {
-    // 1. If an individual custom project is actively targeted on the sidebar
-    if (activeProject) {
-      return (
-        <TasksSheet
-          tasks={tasks}
-          onCreateTask={handleCreateTask}
-          activeProject={activeProject}
-          viewType={viewType}
-          setNewTaskTitle={setNewTaskTitle}
-          selectedProjectId={selectedProjectId}
-          setSelectedProjectId={setSelectedProjectId}
-          newTaskStatus={newTaskStatus}
-          setNewTaskStatus={setNewTaskStatus}
-          newTaskPriority={newTaskPriority}
-          setNewTaskPriority={setNewTaskPriority}
-          projects={projects}
-          filteredTasks={filteredTasks}
-          handleUpdateTaskStatus={handleUpdateTaskStatus}
-          handleDeleteTask={handleDeleteTask}
-        />
-      );
-    }
-
     // 2. Routing logic handled conditionally based on core selected sidebar tabs
     switch (activeTab) {
       case "overview":
         return <OverviewSheet />;
-      case "project":
+      case "projects":
         return (
           <ProjectsSheet
             projects={projects}
             tasks={tasks}
+            onDelete={handleDeleteProject}
             setIsProjectModalOpen={setIsProjectModalOpen}
-            setActiveProject={setActiveProject}
             setActiveTab={setActiveTab}
+            setEditingProject={setEditingProject}
           />
         );
       case "tasks":
@@ -185,32 +172,21 @@ export default function Dashboard() {
           <TasksSheet
             tasks={tasks}
             onCreateTask={handleCreateTask}
-            activeProject={activeProject}
-            viewType={viewType}
-            selectedProjectId={selectedProjectId}
-            setSelectedProjectId={setSelectedProjectId}
             projects={projects}
             filteredTasks={filteredTasks}
             handleUpdateTaskStatus={handleUpdateTaskStatus}
             handleDeleteTask={handleDeleteTask}
           />
         );
+      case "calender":
+        return <CalenderSheet />;
       case "meetings":
       case "timesheet":
       case "chat":
         return <PlaceholdersSheet currentTab={activeTab} />;
       default:
         // Graceful fallback to Project Dashboard Overview list
-        return (
-          <ProjectsSheet
-            setEditingProject={setEditingProject}
-            projects={projects}
-            tasks={filteredTasks}
-            setIsProjectModalOpen={setIsProjectModalOpen}
-            setActiveProject={setActiveProject}
-            setActiveTab={setActiveTab}
-          />
-        );
+        return <OverviewSheet />;
     }
   };
 
@@ -232,36 +208,15 @@ export default function Dashboard() {
           <div className="flex items-center gap-2 text-xs font-medium text-neutral-400">
             <span>Workspace</span>
             <span>/</span>
-            {activeProject && (
-              <span className={`w-2 h-2 rounded-full ${activeProject.color}`} />
-            )}
+
             <span className="text-neutral-950 font-bold">
-              {activeProject
-                ? activeProject.name
-                : activeTab
-                  ? activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
-                  : "Overview"}
+              {activeTab
+                ? activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
+                : "Overview"}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Main Top Header Controls are hidden for non-task sheets to keep UI decluttered */}
-            {(activeProject || activeTab === "tasks") && (
-              <div className="flex items-center bg-neutral-100 p-0.5 rounded-md border border-neutral-200/40 mr-2">
-                <button
-                  onClick={() => setViewType("board")}
-                  className={`p-1.5 rounded-md text-xs transition-all cursor-pointer ${viewType === "board" ? "bg-white text-neutral-950 shadow-3xs" : "text-neutral-400 hover:text-neutral-950"}`}
-                >
-                  <FaColumns size={11} />
-                </button>
-                <button
-                  onClick={() => setViewType("list")}
-                  className={`p-1.5 rounded-md text-xs transition-all cursor-pointer ${viewType === "list" ? "bg-white text-neutral-950 shadow-3xs" : "text-neutral-400 hover:text-neutral-950"}`}
-                >
-                  <FaListUl size={11} />
-                </button>
-              </div>
-            )}
             <button className="inline-flex items-center gap-1.5 text-xs font-bold text-neutral-500 hover:text-neutral-950 px-2.5 py-1.5 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer">
               <FaShareAlt size={11} />
               <span>Share Space</span>
@@ -274,22 +229,10 @@ export default function Dashboard() {
           <div className="mx-auto max-w-6xl space-y-6">
             {/* Dynamic Context Breadcrumb Display Header Title text */}
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 font-mono">
-                {activeProject
-                  ? "Dedicated Project Area"
-                  : "Global Worksheets Engine"}
-              </p>
               <h1 className="mt-0.5 text-2xl font-black tracking-tight text-neutral-950 flex items-center gap-2.5">
-                {activeProject && (
-                  <div
-                    className={`w-3 h-3 rounded-full ${activeProject.color}`}
-                  />
-                )}
-                {activeProject
-                  ? activeProject.name
-                  : activeTab
-                    ? activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
-                    : "Workspace Overview"}
+                {activeTab
+                  ? activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
+                  : "Workspace Overview"}
               </h1>
             </div>
 

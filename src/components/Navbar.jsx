@@ -73,8 +73,8 @@ const Navbar = () => {
                 {user.profilePic ? (
                   /* Condition A: Render user avatar image if it exists */
                   <img
-                    src={user.profilePic}
-                    alt={user.name || "User profile"}
+                    src={user?.profilePic}
+                    alt={user?.name || "User profile"}
                     className="h-full w-full object-cover"
                     onError={(e) => {
                       // Fallback safety: If image link breaks at runtime, remove it to force monogram/avatar fallback
@@ -91,7 +91,7 @@ const Navbar = () => {
                     <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
                 )}
-              </button> 
+              </button>
 
               {/* Floating Profile Context Dropdown Modal */}
               {isDropdownOpen && (
@@ -99,10 +99,10 @@ const Navbar = () => {
                   {/* Account Summary Segment */}
                   <div className="px-3 py-2 border-b border-neutral-100 mb-1">
                     <p className="text-xs font-black text-neutral-950 truncate">
-                      {user.name}
+                      {user?.name}
                     </p>
                     <p className="text-[10px] text-neutral-400 font-mono truncate font-medium mt-0.5">
-                      {user.email}
+                      {user?.email}
                     </p>
                   </div>
 

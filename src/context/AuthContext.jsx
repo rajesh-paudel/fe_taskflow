@@ -1,59 +1,64 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-
+import { api } from "../../services/api";
 const AuthContext = createContext(null);
-
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState({
-    id: "12345",
-    name: "rajesh paudel",
-    email: "rajeshpaudel9863@gmail.com",
-  });
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState(null);
+  console.log(user);
+  useEffect(() => {
+    const initializeAuthSession = async () => {
+      try {
+        const response = await api.get("/auth/me");
+        setUser(response.data);
+      } catch (err) {
+        console.error("Session verification handshake failed:", err);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // useEffect(() => {
-  //   const initializeAuthSession = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:5000/api/auth/me", {
-  //         method: "GET",
-  //         credentials: "include",
-  //       });
+    initializeAuthSession();
+  }, []);
 
-  //       if (response.ok) {
-  //         const userData = await response.json();
-  //         setUser(userData);
-  //       } else {
-  //         setUser(null);
-  //       }
-  //     } catch (err) {
-  //       console.error("Session verification handshake failed:", err);
-  //       setUser(null);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   // initializeAuthSession();
-  // }, []);
-
-  const login = (userData) => {
-    setUser(userData);
+  const login = async (credentials) => {
+    setLoginError(null);
+    setIsLoggingIn(true);
+    try {
+      const response = await api.post("/auth/login", credentials);
+      setUser(response.data.user);
+      return response.data;
+    } catch (err) {
+      const errMsg =
+        err.response?.data?.message || "Authentication system rejection.";
+      setLoginError(errMsg);
+      throw err;
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   const logout = async () => {
     try {
-      await fetch("http://localhost:5000/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
+      await api.post("/auth/logout");
+      toast.success("logout successfull");
     } catch (err) {
       console.error("Backend logout cleanup failed:", err);
+      toast.error("failed to log out");
     } finally {
       setUser(null);
+      navigate("/login");
     }
   };
-
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, login, logout, loginError, isLoggingIn }}
+    >
       {children}
     </AuthContext.Provider>
   );

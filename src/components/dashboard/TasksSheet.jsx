@@ -11,7 +11,7 @@ import {
   FaEdit,
 } from "react-icons/fa";
 import CreateTaskModal from "./createTaskModal";
-
+import { useAuth } from "../../context/AuthContext";
 export default function TasksSheet({
   tasks,
   onCreateTask,
@@ -21,6 +21,8 @@ export default function TasksSheet({
   handleDeleteTask,
   handleEditTask, // Ensure this hook is handled by your upstream task array state layer
 }) {
+  const { user } = useAuth();
+
   // LOCAL VIEW STATE
   const [localViewType, setLocalViewType] = useState("board");
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);

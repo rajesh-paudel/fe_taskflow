@@ -1,6 +1,8 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { useLayoutEffect } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -15,6 +17,16 @@ import HelpCenter from "./pages/HelpCenter";
 import About from "./pages/About";
 import Security from "./pages/security";
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Prevents aggressive refetching when switching browser tabs
+      retry: 1, // Number of retries on network failure
+      staleTime: 5 * 60 * 1000, // Data stays fresh in memory for 5 minutes
+    },
+  },
+});
+
 function App() {
   const location = useLocation();
   const showMarketingLayout = !location.pathname.startsWith("/dashboard");
@@ -28,24 +40,27 @@ function App() {
     return children;
   }
   return (
-    <AuthProvider>
-      <ScrollToTop>
-        {showMarketingLayout && <Navbar />}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/contact-sales" element={<ContactSales />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-and-conditions" element={<TermsConditions />} />
-          <Route path="/help" element={<HelpCenter />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/security" element={<Security />} />
-        </Routes>
-        {showMarketingLayout && <Footer />}
-      </ScrollToTop>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ScrollToTop>
+          {showMarketingLayout && <Navbar />}
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/contact-sales" element={<ContactSales />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-and-conditions" element={<TermsConditions />} />
+            <Route path="/help" element={<HelpCenter />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/security" element={<Security />} />
+          </Routes>
+          {showMarketingLayout && <Footer />}
+        </ScrollToTop>
+      </AuthProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 

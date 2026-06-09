@@ -1,33 +1,37 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { User, Mail, Lock, ArrowRight } from "lucide-react";
-import API from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
-import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { api } from "../../services/api";
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+
+  const { login } = useAuth();
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsRegistering(true);
 
     try {
-      await API.post("/auth/register", {
+      await api.post("/auth/register", {
         name,
         email,
         password,
       });
-      alert("Account created!");
+
+      toast.success("Account created successfully!");
       navigate("/login");
     } catch (err) {
-      alert("Registration failed");
+      toast.error(err);
     } finally {
-      setIsLoading(false);
+      setIsRegistering(false);
     }
   };
 
@@ -41,7 +45,7 @@ export default function Register() {
         {/* HEADER BLOCK: Centered logo layout exactly matching your original structure */}
         <div className="flex flex-col items-center justify-center text-center">
           <img src={logo} className="w-56 h-auto" alt="taskflow logo" />
-          <p className="text-neutral-500 text-sm mt-3">
+          <p className="text-neutral-500 text-sm mt-3 font-medium">
             Create your premium workspace. No credit card required.
           </p>
         </div>
@@ -50,7 +54,7 @@ export default function Register() {
         <form onSubmit={handleRegister} className="space-y-4">
           {/* Input block: Full Name */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-neutral-700 tracking-wide uppercase">
+            <label className="text-[10px] font-black text-neutral-400 tracking-wider uppercase font-mono">
               Full Name
             </label>
             <div className="flex items-center bg-white border border-neutral-200 focus-within:border-neutral-950 focus-within:ring-1 focus-within:ring-neutral-950 rounded-xl px-3.5 py-3 transition-all duration-200 shadow-3xs">
@@ -58,7 +62,7 @@ export default function Register() {
               <input
                 type="text"
                 placeholder="Rajesh Paudel"
-                className="bg-transparent outline-none ml-3 w-full text-base placeholder-neutral-300 text-neutral-900"
+                className="bg-transparent outline-hidden ml-3 w-full text-sm placeholder-neutral-300 text-neutral-900 font-medium"
                 onChange={(e) => setName(e.target.value)}
                 required
               />
@@ -67,7 +71,7 @@ export default function Register() {
 
           {/* Input block: Email Address */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-neutral-700 tracking-wide uppercase">
+            <label className="text-[10px] font-black text-neutral-400 tracking-wider uppercase font-mono">
               Email Address
             </label>
             <div className="flex items-center bg-white border border-neutral-200 focus-within:border-neutral-950 focus-within:ring-1 focus-within:ring-neutral-950 rounded-xl px-3.5 py-3 transition-all duration-200 shadow-3xs">
@@ -75,7 +79,7 @@ export default function Register() {
               <input
                 type="email"
                 placeholder="rajesh@taskflow.com"
-                className="bg-transparent outline-none ml-3 w-full text-base placeholder-neutral-300 text-neutral-900"
+                className="bg-transparent outline-hidden ml-3 w-full text-sm placeholder-neutral-300 text-neutral-900 font-medium"
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
@@ -84,7 +88,7 @@ export default function Register() {
 
           {/* Input block: Password */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-neutral-700 tracking-wide uppercase">
+            <label className="text-[10px] font-black text-neutral-400 tracking-wider uppercase font-mono">
               Password
             </label>
             <div className="flex items-center bg-white border border-neutral-200 focus-within:border-neutral-950 focus-within:ring-1 focus-within:ring-neutral-950 rounded-xl px-3.5 py-3 transition-all duration-200 shadow-3xs">
@@ -92,39 +96,39 @@ export default function Register() {
               <input
                 type="password"
                 placeholder="••••••••"
-                className="bg-transparent outline-none ml-3 w-full text-base placeholder-neutral-300 text-neutral-900"
+                className="bg-transparent outline-hidden ml-3 w-full text-sm placeholder-neutral-300 text-neutral-900 font-medium"
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
           </div>
 
-          {/* Submit CTA Block Trigger */}
+          {/* Submit CTA Block Trigger matched to brand color space */}
           <div className="pt-2">
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-primary text-primary-text hover:bg-primary-hove disabled:opacity-70 py-3.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-[0.99]"
+              disabled={isRegistering}
+              className="w-full bg-[#5A24CA] text-white hover:bg-[#4A1CA5] disabled:bg-neutral-100 disabled:text-neutral-400 py-3.5 rounded-xl font-bold text-xs transition-all duration-200 flex items-center justify-center gap-2 shadow-3xs cursor-pointer active:scale-[0.99] disabled:cursor-not-allowed"
             >
-              {isLoading ? "Creating workspace..." : "Create Account"}
-              {!isLoading && <ArrowRight size={15} />}
+              {isRegistering ? "Creating workspace..." : "Create Account"}
+              {!isRegistering && <ArrowRight size={13} />}
             </button>
           </div>
         </form>
 
         {/* LEGAL COMPLIANCE DISCLAIMER */}
-        <p className="text-xs text-neutral-400 leading-relaxed text-center px-2">
+        <p className="text-[11px] text-neutral-400 leading-relaxed text-center px-2 font-medium">
           By continuing, you acknowledge that you understand and agree to the{" "}
           <Link
             to="/terms-and-conditions"
-            className="text-neutral-600 font-medium hover:underline"
+            className="text-neutral-600 font-bold hover:underline"
           >
             Terms & Conditions
           </Link>{" "}
           and{" "}
           <Link
             to="/privacy-policy"
-            className="text-neutral-600 font-medium hover:underline"
+            className="text-neutral-600 font-bold hover:underline"
           >
             Privacy Policy
           </Link>
@@ -133,11 +137,12 @@ export default function Register() {
 
         {/* BOTTOM NAVIGATION TRANSITION FOOTER */}
         <div className="pt-5 border-t border-neutral-100 text-center">
-          <p className="text-sm text-neutral-500">
+          <p className="text-xs text-neutral-500 font-medium">
             Already have an account?{" "}
             <button
+              type="button"
               onClick={() => navigate("/login")}
-              className="text-blue-600 font-bold hover:underline bg-transparent border-none cursor-pointer inline-block ml-1"
+              className="text-[#5A24CA] font-black hover:underline bg-transparent border-none cursor-pointer inline-block ml-1 font-mono uppercase tracking-tight text-xs"
             >
               Login
             </button>

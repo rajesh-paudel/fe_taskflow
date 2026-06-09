@@ -90,7 +90,7 @@ export default function Dashboard() {
       priority: "Low",
     },
   ]);
-
+  console.log(tasks);
   //for creating new project
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
@@ -180,9 +180,10 @@ export default function Dashboard() {
         );
       case "calender":
         return <CalenderSheet />;
+      case "chat":
+        return <ChatSheet />;
       case "meetings":
       case "timesheet":
-      case "chat":
         return <PlaceholdersSheet currentTab={activeTab} />;
       default:
         // Graceful fallback to Project Dashboard Overview list
@@ -194,11 +195,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-white text-neutral-950 font-sans antialiased flex flex-col md:flex-row overflow-hidden h-screen w-screen">
       {/* SIDEBAR NAVIGATION UNIT */}
       <DashboardSidebar
-        user={user}
         structuralMenuItems={structuralMenuItems}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onLogout={logout}
       />
 
       {/* PRIMARY WORKSPACE CANVAS CONTAINER */}

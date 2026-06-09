@@ -7,14 +7,13 @@ import {
   FaCog,
   FaSignOutAlt,
 } from "react-icons/fa";
-
+import { useAuth } from "../../context/AuthContext";
 export default function DashboardSidebar({
-  user,
   structuralMenuItems,
   activeTab,
   setActiveTab,
-  onLogout,
 }) {
+  const { user, logout } = useAuth();
   const handleMenuClick = (tabId) => {
     setActiveTab(tabId);
   };
@@ -86,7 +85,7 @@ export default function DashboardSidebar({
 
       {/* Footer Logout Action Block */}
       <button
-        onClick={onLogout}
+        onClick={logout}
         className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors mt-4 cursor-pointer"
       >
         <FaSignOutAlt className="text-red-500" />

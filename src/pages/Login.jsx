@@ -1,32 +1,28 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ArrowRight } from "lucide-react";
-import API from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
-
+import toast from "react-hot-toast";
 export default function Login() {
+  const { login, isLoggingIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
-      const res = await API.post("/auth/login", {
-        email,
-        password,
-      });
+      const userPayload = await login({ email, password });
 
-      localStorage.setItem("token", res.data.token);
-      navigate("/dashboard");
+      if (userPayload) {
+        navigate("/");
+      }
     } catch (err) {
-      alert("Invalid credentials");
-    } finally {
-      setIsLoading(false);
+      console.log(err);
+      toast.error(err);
     }
   };
 
@@ -89,11 +85,11 @@ export default function Login() {
           <div className="pt-2">
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoggingIn}
               className="w-full bg-primary text-primary-text hover:bg-primary-hover disabled:bg-neutral-400 py-3.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-[0.99]"
             >
-              {isLoading ? "Authenticating..." : "Sign In"}
-              {!isLoading && <ArrowRight size={15} />}
+              {isLoggingIn ? "Authenticating..." : "Sign In"}
+              {!isLoggingIn && <ArrowRight size={15} />}
             </button>
           </div>
         </form>

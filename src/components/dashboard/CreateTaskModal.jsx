@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaFolder, FaUserPlus, FaTimes } from "react-icons/fa";
-
+import { useAuth } from "../../context/AuthContext";
 const CreateTaskModal = ({
   setIsTaskModalOpen,
   isTaskModalOpen,
@@ -8,6 +8,7 @@ const CreateTaskModal = ({
   onCreateTask,
   activeProject = null,
 }) => {
+  const { user } = useAuth();
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskStartDate, setNewTaskStartDate] = useState("");
   const [newTaskDueDate, setNewTaskDueDate] = useState("");
@@ -45,8 +46,10 @@ const CreateTaskModal = ({
 
     const createdTaskObject = {
       id: `t-${Date.now()}`,
+
       projectId: activeProject?.id || selectedProjectId,
       title: newTaskTitle.trim(),
+      owner: user?.id,
       startDate: newTaskStartDate,
       dueDate: newTaskDueDate,
       assigneeEmails: newTaskAssignees,

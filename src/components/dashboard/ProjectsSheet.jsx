@@ -20,10 +20,10 @@ export default function ProjectsSheet({
   setEditingProject,
   onDelete,
 }) {
+  
   const { user } = useAuth();
-  const [projectLayoutMode, setProjectLayoutMode] = useState("grid"); //grid and list
+  const [projectLayoutMode, setProjectLayoutMode] = useState("grid");
   const [deleteProjectId, setDeleteProjectId] = useState(null);
-  // Helper utility to safely count tasks mapping to explicit project structures
   const getProjectTaskStats = (projectId) => {
     const projectSubTasks = tasks.filter((t) => t.projectId === projectId);
     const completed = projectSubTasks.filter((t) => t.status === "Done").length;
@@ -36,7 +36,7 @@ export default function ProjectsSheet({
     setEditingProject(project);
     setIsProjectModalOpen(true);
   };
-  // Mock team members generation architecture matching your layout blueprint requirements
+
   const mockTeamAvatars = [
     { text: "RP", bg: "bg-neutral-950" },
     { text: "JB", bg: "bg-blue-600" },
@@ -89,7 +89,6 @@ export default function ProjectsSheet({
         </div>
       </div>
 
-      {/* Conditionally Render Based on Selected Layout Button */}
       {projectLayoutMode === "grid" ? (
         /* GRID LAYOUT VIEW */
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -101,13 +100,12 @@ export default function ProjectsSheet({
                 key={project.id}
                 className="group relative rounded-xl border border-neutral-200/75 bg-white p-4 flex flex-col justify-between hover:border-neutral-400 shadow-3xs hover:shadow-2xs transition-all duration-300"
               >
-                {/* ⚙️ ABSOLUTE ACTION BUTTONS CONTAINER (Visible on Hover for Owners only) */}
                 {isOwner && (
                   <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleEditProject(project); // Define your edit handler function
+                        handleEditProject(project);
                       }}
                       title="Edit Project Space"
                       className="w-6 h-6 border border-neutral-200 bg-white text-neutral-500 hover:text-neutral-900 rounded-md flex items-center justify-center transition-all shadow-3xs cursor-pointer hover:border-neutral-300"
@@ -117,7 +115,7 @@ export default function ProjectsSheet({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setDeleteProjectId(project.id); // Define your global delete dialog trigger
+                        setDeleteProjectId(project.id);
                       }}
                       title="Delete Project Space"
                       className="w-6 h-6 border border-neutral-100 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-md flex items-center justify-center transition-all shadow-3xs cursor-pointer"
@@ -139,7 +137,6 @@ export default function ProjectsSheet({
                       </h3>
                     </div>
 
-                    {/* 👑 CONTEXTUAL OWNER TAG BADGE (Pushed to left of buttons if hovered) */}
                     {isOwner && (
                       <span className="text-[9px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded bg-purple-50 border border-purple-100/70 text-[#5A24CA] font-mono select-none transition-all group-hover:mr-14">
                         Owner
@@ -152,7 +149,6 @@ export default function ProjectsSheet({
                       "No custom manifest summary specified for this corporate roadmap sector allocation."}
                   </p>
 
-                  {/* Task Completion Counter Row */}
                   <div className="flex items-center gap-1.5 text-[10px] font-semibold text-neutral-500 font-mono">
                     <FaTasks className="text-neutral-300" size={10} />
                     <span>
@@ -161,7 +157,6 @@ export default function ProjectsSheet({
                   </div>
                 </div>
 
-                {/* Modern Progress Bar Track */}
                 <div className="w-full mt-3 h-1.5 bg-neutral-100 border border-neutral-200/50 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-[#5A24CA] rounded-full transition-all duration-500 ease-out"
@@ -171,7 +166,6 @@ export default function ProjectsSheet({
                   />
                 </div>
 
-                {/* Team Avatars Block & Interactivity Footer */}
                 <div className="mt-3 pt-3 border-t border-neutral-100/60 flex items-center justify-between gap-2">
                   <div className="flex items-center -space-x-1.5 overflow-hidden">
                     {mockTeamAvatars.map((avatar, idx) => (
@@ -182,7 +176,7 @@ export default function ProjectsSheet({
                         {avatar.text}
                       </div>
                     ))}
-                    {/* Explicit Request Layout: +8 +9 stack layout tag element */}
+
                     <div className="w-6 h-6 rounded-full border border-white bg-neutral-100 text-neutral-500 text-[8px] font-bold flex items-center justify-center shrink-0 font-mono select-none">
                       +8
                     </div>
@@ -209,7 +203,6 @@ export default function ProjectsSheet({
                 key={project.id}
                 className="relative flex flex-col sm:flex-row sm:items-center justify-between p-3.5 hover:bg-neutral-50/50 cursor-pointer gap-3 text-xs"
               >
-                {/* Column 1: Project Identity */}
                 <div className="flex items-center gap-3 min-w-0">
                   <span
                     className={`w-2.5 h-2.5 rounded-full shrink-0 ${project.color || "bg-neutral-400"}`}
@@ -218,7 +211,7 @@ export default function ProjectsSheet({
                     <p className="font-bold text-neutral-900 truncate">
                       {project.name}
                     </p>
-                    {/* 👑 CONTEXTUAL OWNER TAG BADGE */}
+
                     {isOwner && (
                       <span className="text-[8px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded bg-purple-50 border border-purple-100/70 text-[#5A24CA] font-mono select-none">
                         Owner
@@ -232,14 +225,11 @@ export default function ProjectsSheet({
                   {project.desc || "No custom manifest summary specified."}
                 </p>
 
-                {/* Column 2: Tasks, Team Matrix & Static Action Buttons */}
                 <div className="flex items-center gap-4 justify-between sm:justify-end shrink-0">
-                  {/* Clean Metric Counter Badge */}
                   <span className="text-[10px] font-mono text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded font-bold whitespace-nowrap">
                     {stats.completed}/{stats.total} Completed
                   </span>
 
-                  {/* Dynamic Avatar Overflow Strip */}
                   <div className="flex items-center -space-x-1.5">
                     {mockTeamAvatars.slice(0, 2).map((avatar, idx) => (
                       <div
@@ -254,12 +244,11 @@ export default function ProjectsSheet({
                     </div>
                   </div>
 
-                  {/* ⚙️ STATIC ACTION BUTTONS (Always Visible for Owners inline) */}
                   {isOwner && (
                     <div className="flex items-center gap-1 z-20 pl-1 border-l border-neutral-200">
                       <button
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevents drilldown trigger
+                          e.stopPropagation();
                           handleEditProject(project);
                         }}
                         title="Edit Project Space"
@@ -269,7 +258,7 @@ export default function ProjectsSheet({
                       </button>
                       <button
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevents drilldown trigger
+                          e.stopPropagation();
                           setDeleteProjectId(project.id);
                         }}
                         title="Delete Project Space"

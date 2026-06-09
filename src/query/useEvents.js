@@ -1,29 +1,30 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "./axiosInstance";
-export function useGetEvents() {
-  return useQuery({
-    queryKey: ["events"],
-    queryFn: async () => {
-      const { data } = await api.get("/events");
-      return data;
-    },
-  });
-}
+import axios from "axios";
+import { api } from "../services/api";
 
-export function useCreateEvent() {
+export const useEvents = (year, month) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (newEventPayload) => {
-      const { data } = await api.post("/events", newEventPayload);
+  // Fetch events for the current grid month
+  const { data: events = [], isLoading } = useQuery({
+    queryKey: ["events", year, month],
+    queryFn: async () => {
+      const { data } = await api.get(`/events?year=${year}&month=${month}`);
       return data;
     },
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["events"] });
-    },
-    onError: (error) => {
-      console.error("Failed to commit event pipeline sync:", error);
-    },
   });
-}
+
+  // Create Event Mutation
+  const createEvent = useMutation({
+    mutationFn: (newEvent) => api.post("/events", newEvent),
+    onSuccess: () => queryClient.invalidateQueries(["events", year, month]),
+  });
+
+  // Delete Event Mutation
+  const deleteEvent = useMutation({
+    mutationFn: (id) => api.delete(`/events/${id}`),
+    onSuccess: () => queryClient.invalidateQueries(["events", year, month]),
+  });
+
+  return { events, isLoading, createEvent, deleteEvent };
+};

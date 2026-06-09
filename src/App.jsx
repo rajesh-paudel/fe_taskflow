@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { useLayoutEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Toaster } from "react-hot-toast";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -42,6 +43,21 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: "#ffffff",
+              color: "#171717",
+              fontSize: "13px",
+              fontWeight: "600",
+              borderRadius: "12px",
+              border: "1px solid #e5e5e5",
+              boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
+            },
+          }}
+        />
         <ScrollToTop>
           {showMarketingLayout && <Navbar />}
           <Routes>

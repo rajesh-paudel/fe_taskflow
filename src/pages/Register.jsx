@@ -4,7 +4,7 @@ import { User, Mail, Lock, ArrowRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
 import toast from "react-hot-toast";
-import { api } from "../../services/api";
+import { api } from "../services/api";
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

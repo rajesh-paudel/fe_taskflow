@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { api } from "../../services/api";
+import { api } from "../services/api";
 const AuthContext = createContext(null);
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";

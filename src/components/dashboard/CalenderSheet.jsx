@@ -8,56 +8,13 @@ import {
   FaListUl,
   FaTrashAlt,
 } from "react-icons/fa";
-
+import { useEvents } from "../../query/useEvents";
+import toast from "react-hot-toast";
 export default function CalendarSheet() {
-  // 🗓️ TIMELINE NAVIGATION STATE (Anchored to current system date)
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 5, 1)); // June 2026
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDayCell, setSelectedDayCell] = useState(null);
   const [viewingAllEventsDate, setViewingAllEventsDate] = useState(null);
   const [activeViewEvent, setActiveViewEvent] = useState(null);
-
-  // 📝 LOCALIZED SYSTEM EVENTS STORAGE SCHEMA
-  const [events, setEvents] = useState([
-    {
-      id: "e1",
-      title: "Build UI High-Fidelity Strip",
-      date: "2026-06-03",
-      isAllDay: true,
-      color: "bg-[#5A24CA] text-white",
-    },
-    {
-      id: "e2",
-      title: "Review Real Estate Components",
-      date: "2026-06-03",
-      isAllDay: false,
-      startTime: "09:00",
-      endTime: "10:30",
-      color: "bg-amber-500 text-white",
-    },
-    {
-      id: "e3",
-      title: "Client Sync (Jason Byun)",
-      date: "2026-06-03",
-      isAllDay: true,
-      color: "bg-emerald-600 text-white",
-    },
-    {
-      id: "e4",
-      title: "Next.js Build Optimization",
-      date: "2026-06-03",
-      isAllDay: false,
-      startTime: "14:00",
-      endTime: "15:30",
-      color: "bg-blue-600 text-white",
-    },
-    {
-      id: "e5",
-      title: "Database Integration Check",
-      date: "2026-06-12",
-      isAllDay: true,
-      color: "bg-[#5A24CA] text-white",
-    },
-  ]);
 
   // 🧪 FORM VALUES STATE
   const [newEventTitle, setNewEventTitle] = useState("");
@@ -75,6 +32,7 @@ export default function CalendarSheet() {
   //  DYNAMIC CALENDAR HEIGHT MATHEMATICS MATRIX
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+  const { events, createEvent, deleteEvent } = useEvents(year, month + 1);
 
   const firstDayOfMonthIndex = new Date(year, month, 1).getDay();
   const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
@@ -110,35 +68,30 @@ export default function CalendarSheet() {
   // NAVIGATION WORKFLOWS
   const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
-  const handleToday = () =>
-    setCurrentDate(
-      new Date(systemToday.getFullYear(), systemToday.getMonth(), 1),
-    );
+  const handleToday = () => setCurrentDate(new Date());
 
-  // FORM COMMIT DISPATCHER
   const handleCreateEventSubmit = (e) => {
     e.preventDefault();
     if (!newEventTitle.trim() || !selectedDayCell) return;
 
-    const freshEvent = {
-      id: `e_${Date.now()}`,
+    createEvent.mutate({
       title: newEventTitle.trim(),
       date: selectedDayCell.dateStr,
-      color: newEventColor,
       isAllDay,
+      color: newEventColor,
       ...(isAllDay ? {} : { startTime, endTime }),
-    };
-
-    setEvents([...events, freshEvent]);
-    newEventTitle("");
+    });
+    toast.success("event added");
+    // Reset local form states
+    setNewEventTitle("");
     setIsAllDay(true);
     setSelectedDayCell(null);
   };
 
-  // DELETE EVENT DISPATCHER
   const handleDeleteEvent = (id) => {
-    setEvents(events.filter((event) => event.id !== id));
+    deleteEvent.mutate(id);
     setActiveViewEvent(null);
+    toast.success("event deleted");
   };
 
   return (

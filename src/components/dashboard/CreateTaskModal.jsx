@@ -6,7 +6,6 @@ const CreateTaskModal = ({
   isTaskModalOpen,
   projects = [],
   onCreateTask,
-  activeProject = null,
 }) => {
   const { user } = useAuth();
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -17,7 +16,7 @@ const CreateTaskModal = ({
 
   // Default to first project if available, otherwise blank string
   const [selectedProjectId, setSelectedProjectId] = useState(
-    activeProject?.id || (projects.length > 0 ? projects[0].id : ""),
+    projects.length > 0 ? projects[0].id : "",
   );
 
   // Assignee email management states
@@ -45,11 +44,8 @@ const CreateTaskModal = ({
     e.preventDefault();
 
     const createdTaskObject = {
-      id: `t-${Date.now()}`,
-
-      projectId: activeProject?.id || selectedProjectId,
+      projectId: selectedProjectId,
       title: newTaskTitle.trim(),
-      owner: user?.id,
       startDate: newTaskStartDate,
       dueDate: newTaskDueDate,
       assigneeEmails: newTaskAssignees,
@@ -173,28 +169,25 @@ const CreateTaskModal = ({
             )}
           </div>
 
-          {/* Fallback space project selection dropdown */}
-          {!activeProject && (
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-neutral-700">
-                Target Workspace Project
-              </label>
-              <div className="flex items-center bg-white border border-neutral-200 rounded-lg px-2.5 py-1.5">
-                <FaFolder className="text-neutral-400 mr-2 text-xs" />
-                <select
-                  value={selectedProjectId}
-                  onChange={(e) => setSelectedProjectId(e.target.value)}
-                  className="w-full text-xs font-semibold bg-transparent text-neutral-800 focus:outline-hidden cursor-pointer"
-                >
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-neutral-700">
+              Target Workspace Project
+            </label>
+            <div className="flex items-center bg-white border border-neutral-200 rounded-lg px-2.5 py-1.5">
+              <FaFolder className="text-neutral-400 mr-2 text-xs" />
+              <select
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                className="w-full text-xs font-semibold bg-transparent text-neutral-800 focus:outline-hidden cursor-pointer"
+              >
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
+          </div>
 
           {/* Core Configuration Tiers */}
           <div className="grid grid-cols-2 gap-3">

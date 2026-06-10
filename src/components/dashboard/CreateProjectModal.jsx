@@ -46,8 +46,8 @@ export default function CreateProjectModal({
 
     // Package the detailed data object
     const projectPayload = {
-      id: editingProject ? editingProject.id : `p_${Date.now()}`,
-      owner: editingProject ? editingProject.owner : user?.id,
+      id: editingProject ? editingProject.id : null,
+
       name: projectName.trim(),
       desc: projectDesc.trim(),
       color: selectedColor,

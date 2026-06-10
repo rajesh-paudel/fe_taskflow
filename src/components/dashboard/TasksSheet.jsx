@@ -12,25 +12,30 @@ import {
 } from "react-icons/fa";
 import CreateTaskModal from "./createTaskModal";
 import { useAuth } from "../../context/AuthContext";
-export default function TasksSheet({
-  tasks,
-  onCreateTask,
-  projects,
-  filteredTasks,
-  handleUpdateTaskStatus,
-  handleDeleteTask,
-  handleEditTask, // Ensure this hook is handled by your upstream task array state layer
-}) {
+import { useTasks } from "../../query/useTasks";
+import { useProjects } from "../../query/useProjects";
+export default function TasksSheet() {
   const { user } = useAuth();
-
+  const {
+    tasks,
+    isLoading: tasksLoading,
+    createTask,
+    updateTask,
+    deleteTask,
+  } = useTasks();
+  const { projects, isLoading: projectsLoading } = useProjects();
   // LOCAL VIEW STATE
   const [localViewType, setLocalViewType] = useState("board");
+  const [selectedProjectId, setSelectedProjectId] = useState("all");
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTaskPayload, setEditingTaskPayload] = useState(null);
 
   // Confirmation Delete States
   const [deleteConfirmationId, setDeleteConfirmationId] = useState(null);
-
+  const filteredTasks =
+    selectedProjectId === "all"
+      ? tasks
+      : tasks.filter((task) => task.projectId === selectedProjectId);
   const kanbanColumns = [
     { key: "To Do", label: "To Do" },
     { key: "In Progress", label: "In Progress" },
@@ -54,10 +59,12 @@ export default function TasksSheet({
     setEditingTaskPayload(task);
     setIsTaskModalOpen(true);
   };
-
+  const handleCreateTask = (data) => {
+    createTask(data);
+  };
   const executeConfirmedDeletion = () => {
     if (deleteConfirmationId) {
-      handleDeleteTask(deleteConfirmationId);
+      deleteTask(deleteConfirmationId);
       setDeleteConfirmationId(null);
     }
   };
@@ -456,7 +463,7 @@ export default function TasksSheet({
           isTaskModalOpen={isTaskModalOpen}
           setIsTaskModalOpen={setIsTaskModalOpen}
           projects={projects}
-          onCreateTask={onCreateTask}
+          onCreateTask={handleCreateTask}
           editingTask={editingTaskPayload} // Pass down editing target payload context
         />
       )}

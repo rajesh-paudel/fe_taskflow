@@ -16,7 +16,8 @@ import {
   FaCalendar,
 } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
-import CreateProjectModal from "../components/dashboard/CreateProjectModal";
+import { useSearchParams } from "react-router-dom";
+
 import DashboardSidebar from "../components/dashboard/DashboardSidebar";
 import TasksSheet from "../components/dashboard/TasksSheet";
 import PlaceholdersSheet from "../components/dashboard/PlaceholdersSheet";
@@ -36,69 +37,11 @@ const structuralMenuItems = [
 ];
 export default function Dashboard() {
   const { user, logout } = useAuth();
-
-  // Core Projects Array State
-  const [projects, setProjects] = useState([
-    {
-      id: "p1",
-      name: "Website Redesign",
-      color: "bg-blue-500",
-      desc: "Marketing site refresh",
-    },
-    {
-      id: "p2",
-      name: "Mobile App",
-      color: "bg-purple-500",
-      desc: "iOS and Android client build",
-    },
-    {
-      id: "p3",
-      name: "Marketing",
-      color: "bg-emerald-500",
-      desc: "Q3 campaign rollout",
-    },
-  ]);
-
-  // Master Relational Task Collection
-  const [tasks, setTasks] = useState([
-    {
-      id: "t1",
-      projectId: "p1",
-      title: "Refactor global navigation bar to Tailwind CSS v4",
-      status: "In Progress",
-      priority: "High",
-    },
-    {
-      id: "t2",
-      projectId: "p1",
-      title: "Optimize hero asset bundle image footprints",
-      status: "To Do",
-      priority: "Medium",
-    },
-    {
-      id: "t3",
-      projectId: "p2",
-      title: "Draft deployment schema manifest configurations",
-      status: "To Do",
-      priority: "High",
-    },
-    {
-      id: "t4",
-      projectId: "p3",
-      title: "Schedule copywriter syncing sessions",
-      status: "Done",
-      priority: "Low",
-    },
-  ]);
-  console.log(tasks);
-  //for creating new project
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-
-  //handles active tab in sidebar inorder to control worksheet
-  const [activeTab, setActiveTab] = useState("overview");
-
-  //handles project to be edited
-  const [editingProject, setEditingProject] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "overview";
+  const handleTabChange = (tabName) => {
+    setSearchParams({ tab: tabName });
+  };
 
   const getHeaderTitle = () => {
     if (activeProject) return activeProject.name;
@@ -108,76 +51,15 @@ export default function Dashboard() {
     return currentItem ? currentItem.label : "Dashboard Home Overview";
   };
 
-  //save or update a project
-  const handleSaveOrUpdateProject = (projectPayload) => {
-    const projectExists = projects.some((p) => p.id === projectPayload.id);
-
-    if (projectExists) {
-      // Mode: Update state safely map matrix layout array updates
-      setProjects(
-        projects.map((p) => (p.id === projectPayload.id ? projectPayload : p)),
-      );
-    } else {
-      // Mode: Create completely fresh data entry allocation array insert
-      setProjects([...projects, projectPayload]);
-    }
-  };
-
-  //creating a task
-  const handleCreateTask = (newTask) => {
-    setTasks((prev) => [...prev, newTask]);
-  };
-
-  // Pipeline Filtering Architecture
-  const filteredTasks = tasks.filter((task) => {
-    if (activeTab === "tasks") return true;
-    if (activeTab === "dashboard") return true;
-    if (activeTab === "projects") return true;
-    return false;
-  });
-
-  //updating the task status
-  const handleUpdateTaskStatus = (taskId, nextStatus) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, status: nextStatus } : t)),
-    );
-  };
-
-  const handleDeleteTask = (taskId) => {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
-  };
-
-  const handleDeleteProject = (projectId) => {
-    setProjects((prev) => prev.filter((p) => p.id !== projectId));
-  };
   // Central Dynamic Sheet Router Logic
   const renderActiveWorkspaceSheet = () => {
-    // 2. Routing logic handled conditionally based on core selected sidebar tabs
     switch (activeTab) {
       case "overview":
         return <OverviewSheet />;
       case "projects":
-        return (
-          <ProjectsSheet
-            projects={projects}
-            tasks={tasks}
-            onDelete={handleDeleteProject}
-            setIsProjectModalOpen={setIsProjectModalOpen}
-            setActiveTab={setActiveTab}
-            setEditingProject={setEditingProject}
-          />
-        );
+        return <ProjectsSheet />;
       case "tasks":
-        return (
-          <TasksSheet
-            tasks={tasks}
-            onCreateTask={handleCreateTask}
-            projects={projects}
-            filteredTasks={filteredTasks}
-            handleUpdateTaskStatus={handleUpdateTaskStatus}
-            handleDeleteTask={handleDeleteTask}
-          />
-        );
+        return <TasksSheet />;
       case "calender":
         return <CalenderSheet />;
       case "chat":
@@ -197,7 +79,7 @@ export default function Dashboard() {
       <DashboardSidebar
         structuralMenuItems={structuralMenuItems}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        onTabChange={handleTabChange}
       />
 
       {/* PRIMARY WORKSPACE CANVAS CONTAINER */}
@@ -240,16 +122,6 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
-
-      <CreateProjectModal
-        editingProject={editingProject}
-        isOpen={isProjectModalOpen}
-        onClose={() => {
-          setEditingProject(null);
-          setIsProjectModalOpen(false);
-        }}
-        onCreateProject={handleSaveOrUpdateProject}
-      />
     </div>
   );
 }

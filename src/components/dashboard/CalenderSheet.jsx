@@ -33,7 +33,7 @@ export default function CalendarSheet() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const { events, createEvent, deleteEvent } = useEvents(year, month + 1);
-
+  console.log(events);
   const firstDayOfMonthIndex = new Date(year, month, 1).getDay();
   const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
   const totalDaysInPrevMonth = new Date(year, month, 0).getDate();

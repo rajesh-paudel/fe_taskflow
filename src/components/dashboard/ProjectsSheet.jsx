@@ -11,21 +11,29 @@ import {
 } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 import ConfirmationModal from "../ConfirmationModal";
-export default function ProjectsSheet({
-  projects = [],
-  tasks = [],
-  setIsProjectModalOpen,
-  setActiveProject,
-  setActiveTab,
-  setEditingProject,
-  onDelete,
-}) {
-  
+import { useTasks } from "../../query/useTasks";
+import { useProjects } from "../../query/useProjects";
+import CreateProjectModal from "./CreateProjectModal";
+import toast from "react-hot-toast";
+export default function ProjectsSheet() {
   const { user } = useAuth();
+  const {
+    projects,
+    createProject,
+    updateProject,
+    deleteProject,
+    isUpdating,
+    isDeleting,
+    isCreating,
+  } = useProjects();
+  const { tasks } = useTasks();
+  console.log(projects, tasks);
   const [projectLayoutMode, setProjectLayoutMode] = useState("grid");
   const [deleteProjectId, setDeleteProjectId] = useState(null);
+  const [editingProject, setEditingProject] = useState(null);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const getProjectTaskStats = (projectId) => {
-    const projectSubTasks = tasks.filter((t) => t.projectId === projectId);
+    const projectSubTasks = tasks?.filter((t) => t.projectId === projectId);
     const completed = projectSubTasks.filter((t) => t.status === "Done").length;
     return {
       total: projectSubTasks.length,
@@ -43,10 +51,51 @@ export default function ProjectsSheet({
     { text: "AA", bg: "bg-emerald-600" },
   ];
 
+  const handleSaveOrUpdateProject = (data) => {
+    if (editingProject && data.id) {
+      updateProject(
+        {
+          id: data.id,
+          name: data.name.trim(),
+          desc: data.desc,
+          color: data.color,
+        },
+        {
+          onSuccess: () => {
+            setIsProjectModalOpen(false);
+            toast.success("Project updated successfully!");
+          },
+          onError: (err) => {
+            console.error("Failed to update project workspace:", err);
+            toast.error("Failed to update project!");
+          },
+        },
+      );
+    } else {
+      createProject(
+        {
+          name: data.name.trim(),
+          desc: data.desc,
+          color: data.color,
+        },
+        {
+          onSuccess: () => {
+            setIsProjectModalOpen(false);
+            toast.success("project created successfully!");
+          },
+          onError: (err) => {
+            console.error("Failed to establish new project workspace:", err);
+            toast.error("Failed to create project!");
+          },
+        },
+      );
+    }
+  };
   const handleDeleteProject = () => {
     if (!deleteProjectId) return null;
-    onDelete?.(deleteProjectId);
+    deleteProject(deleteProjectId);
     setDeleteProjectId(null);
+    toast.success("Project deleted successfully!")
   };
   return (
     <div className="space-y-6">
@@ -93,14 +142,13 @@ export default function ProjectsSheet({
         /* GRID LAYOUT VIEW */
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => {
-            const isOwner = user?.id === project.owner;
             const stats = getProjectTaskStats(project.id);
             return (
               <div
                 key={project.id}
                 className="group relative rounded-xl border border-neutral-200/75 bg-white p-4 flex flex-col justify-between hover:border-neutral-400 shadow-3xs hover:shadow-2xs transition-all duration-300"
               >
-                {isOwner && (
+                {project?.isOwner && (
                   <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
                     <button
                       onClick={(e) => {
@@ -137,7 +185,7 @@ export default function ProjectsSheet({
                       </h3>
                     </div>
 
-                    {isOwner && (
+                    {project?.isOwner && (
                       <span className="text-[9px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded bg-purple-50 border border-purple-100/70 text-[#5A24CA] font-mono select-none transition-all group-hover:mr-14">
                         Owner
                       </span>
@@ -145,8 +193,7 @@ export default function ProjectsSheet({
                   </div>
 
                   <p className="text-[11px] mt-1 mb-4 text-neutral-400 line-clamp-2 leading-relaxed">
-                    {project.desc ||
-                      "No custom manifest summary specified for this corporate roadmap sector allocation."}
+                    {project.desc}
                   </p>
 
                   <div className="flex items-center gap-1.5 text-[10px] font-semibold text-neutral-500 font-mono">
@@ -195,7 +242,6 @@ export default function ProjectsSheet({
         /* COMPACT LIST ROW VIEW */
         <div className="border border-neutral-200/80 rounded-xl overflow-hidden bg-white shadow-3xs divide-y divide-neutral-100">
           {projects.map((project) => {
-            const isOwner = user?.id === project.owner;
             const stats = getProjectTaskStats(project.id);
 
             return (
@@ -212,7 +258,7 @@ export default function ProjectsSheet({
                       {project.name}
                     </p>
 
-                    {isOwner && (
+                    {project?.isOwner && (
                       <span className="text-[8px] font-black tracking-wider uppercase px-1.5 py-0.5 rounded bg-purple-50 border border-purple-100/70 text-[#5A24CA] font-mono select-none">
                         Owner
                       </span>
@@ -244,7 +290,7 @@ export default function ProjectsSheet({
                     </div>
                   </div>
 
-                  {isOwner && (
+                  {project?.isOwner && (
                     <div className="flex items-center gap-1 z-20 pl-1 border-l border-neutral-200">
                       <button
                         onClick={(e) => {
@@ -283,6 +329,15 @@ export default function ProjectsSheet({
         title="confirm Action"
         description="Are you sure you want to delete this project permanently? This operation cannot be undone. "
         confirmText="Delete"
+      />
+      <CreateProjectModal
+        editingProject={editingProject}
+        isOpen={isProjectModalOpen}
+        onClose={() => {
+          setEditingProject(null);
+          setIsProjectModalOpen(false);
+        }}
+        onCreateProject={handleSaveOrUpdateProject}
       />
     </div>
   );

@@ -11,7 +11,7 @@ import { useAuth } from "../../context/AuthContext";
 export default function DashboardSidebar({
   structuralMenuItems,
   activeTab,
-  setActiveTab,
+  onTabChange,
 }) {
   const { user, logout } = useAuth();
   const handleMenuClick = (tabId) => {
@@ -63,7 +63,7 @@ export default function DashboardSidebar({
               return (
                 <button
                   key={item.id}
-                  onClick={() => handleMenuClick(item.id)}
+                  onClick={() => onTabChange(item.id)}
                   className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-all cursor-pointer ${
                     isSelected
                       ? "bg-white text-neutral-950 font-bold shadow-xs border border-neutral-200/60"

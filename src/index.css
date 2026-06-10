@@ -44,3 +44,15 @@ body {
   font-family: Arial, sans-serif;
   background: #f5f7fb;
 }
+
+.scrollbar-hide {
+  /* 2. For Firefox */
+  scrollbar-width: none;
+
+  /* 3. For Internet Explorer and Legacy Edge */
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

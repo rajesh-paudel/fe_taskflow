@@ -25,6 +25,7 @@ import ProjectsSheet from "../components/dashboard/ProjectsSheet";
 import OverviewSheet from "../components/dashboard/OverviewSheet";
 import ChatSheet from "../components/dashboard/ChatSheet";
 import CalenderSheet from "../components/dashboard/CalenderSheet";
+import MeetingSheet from "../components/dashboard/MeetingSheet";
 
 //navigation  items for the sidebar so to control the worksheet
 const structuralMenuItems = [
@@ -65,10 +66,8 @@ export default function Dashboard() {
       case "chat":
         return <ChatSheet />;
       case "meetings":
-      case "timesheet":
-        return <PlaceholdersSheet currentTab={activeTab} />;
+        return <MeetingSheet />;
       default:
-        // Graceful fallback to Project Dashboard Overview list
         return <OverviewSheet />;
     }
   };

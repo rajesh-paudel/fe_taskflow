@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
 import toast from "react-hot-toast";
 export default function Login() {
-  const { login, isLoggingIn } = useAuth();
+  const { login, isLoggingIn, loginError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -13,6 +13,9 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (!email || !password) {
+      return toast.error("Please fill in all fields.");
+    }
 
     try {
       const userPayload = await login({ email, password });
@@ -21,8 +24,14 @@ export default function Login() {
         navigate("/");
       }
     } catch (err) {
-      console.log(err);
-      toast.error(err);
+      console.error("Login submission failed:", err);
+
+      const errorMessage =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Invalid email or password.";
+
+      toast.error(errorMessage);
     }
   };
 

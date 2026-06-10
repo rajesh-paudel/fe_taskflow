@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaFolder, FaUserPlus, FaTimes } from "react-icons/fa";
-import { useAuth } from "../../context/AuthContext";
+
 const CreateTaskModal = ({
+  editingTaskPayload,
   setIsTaskModalOpen,
   isTaskModalOpen,
-  projects = [],
   onCreateTask,
+  projects = [],
 }) => {
-  const { user } = useAuth();
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskStartDate, setNewTaskStartDate] = useState("");
   const [newTaskDueDate, setNewTaskDueDate] = useState("");
@@ -15,6 +15,7 @@ const CreateTaskModal = ({
   const [newTaskPriority, setNewTaskPriority] = useState("Medium");
 
   // Default to first project if available, otherwise blank string
+
   const [selectedProjectId, setSelectedProjectId] = useState(
     projects.length > 0 ? projects[0].id : "",
   );
@@ -22,6 +23,30 @@ const CreateTaskModal = ({
   // Assignee email management states
   const [emailInput, setEmailInput] = useState("");
   const [newTaskAssignees, setNewTaskAssignees] = useState([]);
+
+  const isEditing = !!editingTaskPayload;
+  useEffect(() => {
+    if (isTaskModalOpen) {
+      if (editingTaskPayload) {
+        setNewTaskTitle(editingTaskPayload.title || "");
+        setNewTaskStartDate(editingTaskPayload.startDate || "");
+        setNewTaskDueDate(editingTaskPayload.dueDate || "");
+        setNewTaskStatus(editingTaskPayload.status || "Todo");
+        setNewTaskPriority(editingTaskPayload.priority || "Medium");
+        setSelectedProjectId(editingTaskPayload.projectId || "");
+        setNewTaskAssignees(editingTaskPayload.assigneeEmails || []);
+      } else {
+        setNewTaskTitle("");
+        setNewTaskStartDate("");
+        setNewTaskDueDate("");
+        setNewTaskStatus("Todo");
+        setNewTaskPriority("Medium");
+        setSelectedProjectId(projects.length > 0 ? projects[0].id : "");
+        setNewTaskAssignees([]);
+      }
+      setEmailInput("");
+    }
+  }, [editingTaskPayload, isTaskModalOpen, projects]);
 
   if (!isTaskModalOpen) return null;
 
@@ -43,7 +68,8 @@ const CreateTaskModal = ({
   const onModalSubmit = (e) => {
     e.preventDefault();
 
-    const createdTaskObject = {
+    const taskPayloadObject = {
+      ...(isEditing && { id: editingTaskPayload.id }),
       projectId: selectedProjectId,
       title: newTaskTitle.trim(),
       startDate: newTaskStartDate,
@@ -53,12 +79,12 @@ const CreateTaskModal = ({
       priority: newTaskPriority,
     };
 
-    onCreateTask(createdTaskObject);
+    onCreateTask(taskPayloadObject);
 
     setNewTaskTitle("");
     setNewTaskStartDate("");
     setNewTaskDueDate("");
-    setNewTaskStatus("To Do");
+    setNewTaskStatus("Todo");
     setNewTaskPriority("Medium");
     setNewTaskAssignees([]);
     setIsTaskModalOpen(false);

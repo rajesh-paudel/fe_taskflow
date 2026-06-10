@@ -14,6 +14,7 @@ import CreateTaskModal from "./createTaskModal";
 import { useAuth } from "../../context/AuthContext";
 import { useTasks } from "../../query/useTasks";
 import { useProjects } from "../../query/useProjects";
+import toast from "react-hot-toast";
 export default function TasksSheet() {
   const { user } = useAuth();
   const {
@@ -60,21 +61,45 @@ export default function TasksSheet() {
     setIsTaskModalOpen(true);
   };
   const handleCreateTask = (data) => {
-    createTask(data);
+    if (data.id) {
+      updateTask(data);
+      toast.success("task updated successfully!");
+    } else {
+      createTask(data);
+      toast.success("task created successfully!");
+    }
+    setEditingTaskPayload(null);
   };
   const executeConfirmedDeletion = () => {
     if (deleteConfirmationId) {
       deleteTask(deleteConfirmationId);
+      toast.success("task deleted successfully!");
       setDeleteConfirmationId(null);
     }
   };
+  const handleUpdateTaskStatus = (task, newStatus) => {
+    updateTask({ ...task, status: newStatus });
+    toast.success(`task status changed to "${newStatus}"`);
+  };
+  const getGetCurrentMonthDays = () => {
+    const current = new Date(); // Automatically resolves to June 2026 based on system clock
+    const year = current.getFullYear();
+    const month = current.getMonth(); // Current month index
 
+    const totalDaysInMonth = new Date(year, month + 1, 0).getDate(); // e.g., 30 for June
+    const daysArray = [];
+
+    for (let i = 1; i <= totalDaysInMonth; i++) {
+      daysArray.push(new Date(year, month, i));
+    }
+    return daysArray;
+  };
   return (
     <div className="space-y-6 relative">
       {/* 🧭 TOP VIEWS SUB-NAVBAR CONTROL */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-200 pb-3 gap-3">
         <div className="flex items-center gap-5 text-xs font-semibold text-neutral-400">
-          {["List", "Grid", "Calendar", "Gantt", "Kanban"].map((tabName) => {
+          {["List", "Gantt", "Kanban"].map((tabName) => {
             const layoutKey =
               tabName === "Kanban"
                 ? "board"
@@ -149,7 +174,7 @@ export default function TasksSheet() {
                   </button>
                 </div>
 
-                <div className="space-y-2.5 overflow-y-auto pr-0.5 flex-1 min-h-[150px]">
+                <div className="space-y-2.5 overflow-y-auto scrollbar-hide pr-0.5 flex-1 min-h-[150px]">
                   {columnTasks.length === 0 ? (
                     <div className="rounded-lg border border-dashed border-neutral-200 bg-white p-6 text-center">
                       <p className="text-[11px] text-neutral-400">
@@ -237,7 +262,7 @@ export default function TasksSheet() {
                             <select
                               value={task.status}
                               onChange={(e) =>
-                                handleUpdateTaskStatus(task.id, e.target.value)
+                                handleUpdateTaskStatus(task, e.target.value)
                               }
                               className="bg-neutral-50 border border-neutral-200 rounded px-1 py-0.5 text-neutral-500 text-[10px] font-medium focus:outline-hidden cursor-pointer"
                             >
@@ -258,133 +283,215 @@ export default function TasksSheet() {
       )}
 
       {/* 📊 GANTT VIEW TIMELINE LAYOUT SYSTEM */}
-      {localViewType === "gantt" && (
-        <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white shadow-3xs">
-          <div className="bg-neutral-50/80 p-3.5 border-b border-neutral-200 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FaStream className="text-neutral-500" size={12} />
-              <h3 className="text-xs font-bold text-neutral-900">
-                Sprint Roadmap Timeline
-              </h3>
-            </div>
-            <span className="text-[10px] text-neutral-400 font-mono">
-              June 2026 Grid
-            </span>
-          </div>
+      {localViewType === "gantt" &&
+        (() => {
+          const currentMonthDays = getGetCurrentMonthDays();
+          const totalDays = currentMonthDays.length;
 
-          <div className="overflow-x-auto">
-            <div className="min-w-[840px] divide-y divide-neutral-100">
-              <div className="grid grid-cols-12 bg-neutral-50/40 text-[10px] font-bold text-neutral-400 uppercase tracking-wider text-center py-2">
-                <div className="col-span-5 text-left pl-4 self-center">
-                  Task Identity Matrix
+          return (
+            /* 🚨 MAIN OUTER CONTAINER: This must allow horizontal + vertical scrolling */
+            <div className="w-full overflow-auto scrollbar-hide border border-neutral-200 rounded-xl bg-white shadow-2xs flex flex-col max-h-[600px]">
+              {/* Header Banner */}
+              <div className="bg-neutral-50/75 p-3.5 border-b border-neutral-200 flex items-center justify-between shrink-0 sticky left-0 w-full">
+                <div className="flex items-center gap-2">
+                  <FaStream className="text-neutral-500" size={12} />
+                  <h3 className="text-xs font-bold text-neutral-900 tracking-tight">
+                    Monthly Operational Roadmap Timeline
+                  </h3>
                 </div>
-                <div className="col-span-7 grid grid-cols-7 border-l border-neutral-100">
-                  {timelineDays.map((day, i) => (
-                    <div
-                      key={i}
-                      className="py-0.5 border-r border-neutral-100/60 last:border-0"
-                    >
-                      {day}
-                    </div>
-                  ))}
-                </div>
+                <span className="text-[10px] text-[#5A24CA] font-mono font-bold bg-purple-50 border border-purple-100 px-2.5 py-1 rounded-md uppercase tracking-wider">
+                  {currentMonthDays[0].toLocaleDateString("en-US", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
               </div>
 
-              {filteredTasks.length === 0 ? (
-                <div className="p-8 text-center text-xs text-neutral-400">
-                  No tracked data entries available.
+              {/* 🚨 THE WORKSPACE: This forces the actual width expansion layout matrix */}
+              <div className="min-w-[2000px] bg-white relative">
+                {/* 💡 Bumped from 1600px to 2000px to guarantee huge day-cells on wide monitors */}
+
+                {/* STICKY TIMELINE HEADER */}
+                <div className="sticky top-0 z-30 flex bg-neutral-50 border-b border-neutral-200 items-center text-[9px] font-bold text-neutral-400 uppercase tracking-wider h-11">
+                  {/* Left Sticky Identity Header block */}
+                  <div className="sticky left-0 z-40 w-[280px] bg-neutral-50 text-left pl-4 font-sans text-neutral-500 border-r border-neutral-200 h-full flex items-center shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]">
+                    Task Identity Matrix
+                  </div>
+
+                  {/* Right Day Grid Header track cells */}
+                  <div
+                    className="flex-1 grid h-full items-center text-center font-mono"
+                    style={{
+                      gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))`,
+                    }}
+                  >
+                    {currentMonthDays.map((dateObj, i) => {
+                      const dayNum = dateObj.getDate();
+                      const isWeekend =
+                        dateObj.getDay() === 0 || dateObj.getDay() === 6;
+                      return (
+                        <div
+                          key={i}
+                          className={`h-full flex flex-col justify-center border-r border-neutral-200/60 last:border-0 font-bold transition-colors
+                    ${isWeekend ? "bg-neutral-100/60 text-neutral-400" : "text-neutral-700"}`}
+                        >
+                          <span className="text-[8px] tracking-tighter opacity-60">
+                            {dateObj.toLocaleDateString("en-US", {
+                              weekday: "narrow",
+                            })}
+                          </span>
+                          <span className="text-[10px] mt-0.5">{dayNum}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              ) : (
-                filteredTasks.map((task) => {
-                  const parentProj = projects.find(
-                    (p) => p.id === task.projectId,
-                  );
-                  const isHigh = task.priority === "High";
-                  const isInProgress = task.status === "In Progress";
-                  const isCompleted = task.status === "Done";
 
-                  let spanClass =
-                    "col-start-2 col-span-3 bg-amber-400/20 text-amber-800 border-amber-300";
-                  if (isInProgress)
-                    spanClass =
-                      "col-start-3 col-span-4 bg-[#5A24CA]/10 text-[#5A24CA] border-[#5A24CA]/20";
-                  if (isCompleted)
-                    spanClass =
-                      "col-start-1 col-span-7 bg-emerald-50 text-emerald-800 border-emerald-200";
+                {/* TASK ROWS SCROLL LANE DATA */}
+                <div className="divide-y divide-neutral-100">
+                  {filteredTasks.length === 0 ? (
+                    <div className="p-16 text-center text-xs font-medium text-neutral-400 w-[280px] sticky left-0">
+                      No tracked data entries currently found in scope.
+                    </div>
+                  ) : (
+                    filteredTasks.map((task) => {
+                      const parentProj = projects.find(
+                        (p) => p.id === task.projectId,
+                      );
+                      const isInProgress = task.status === "In Progress";
+                      const isCompleted = task.status === "Done";
 
-                  return (
-                    <div
-                      key={task.id}
-                      className="grid grid-cols-12 items-center py-3.5"
-                    >
-                      {/* Left Header Info Block Column */}
-                      <div className="col-span-5 pl-4 pr-3 flex items-center justify-between gap-3 min-w-0">
-                        <div className="min-w-0 space-y-0.5">
-                          <p className="text-xs font-bold text-neutral-900 truncate">
-                            {task.title}
-                          </p>
-                          {/* Project row identity attachment */}
-                          <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 font-medium font-mono">
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full shrink-0 ${parentProj?.color || "bg-neutral-400"}`}
-                            />
-                            <span className="truncate">
-                              {parentProj?.name || "Unassigned Space"}
-                            </span>
+                      let colorStyles =
+                        "bg-amber-50 text-amber-800 border-amber-200/70";
+                      if (isInProgress)
+                        colorStyles =
+                          "bg-purple-50 text-[#5A24CA] border-purple-200/60";
+                      if (isCompleted)
+                        colorStyles =
+                          "bg-emerald-50 text-emerald-800 border-emerald-200/60";
+
+                      let startColumn = 1;
+                      let columnSpan = 1;
+
+                      if (task.startDate) {
+                        const taskStart = new Date(task.startDate);
+                        taskStart.setHours(0, 0, 0, 0);
+
+                        const dayIndex = currentMonthDays.findIndex((d) => {
+                          const compareDay = new Date(d);
+                          compareDay.setHours(0, 0, 0, 0);
+                          return compareDay.getTime() === taskStart.getTime();
+                        });
+
+                        if (dayIndex !== -1) {
+                          startColumn = dayIndex + 1;
+                        } else if (taskStart < currentMonthDays[0]) {
+                          startColumn = 1;
+                        }
+
+                        if (task.dueDate) {
+                          const taskDue = new Date(task.dueDate);
+                          taskDue.setHours(0, 0, 0, 0);
+                          const activeStart =
+                            taskStart < currentMonthDays[0]
+                              ? currentWeekDays[0]
+                              : taskStart;
+                          const diffTime = taskDue - activeStart;
+                          const diffDays =
+                            Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                          columnSpan = Math.max(
+                            1,
+                            Math.min(diffDays, totalDays + 1 - startColumn),
+                          );
+                        }
+                      }
+
+                      return (
+                        <div
+                          key={task.id}
+                          className="flex items-center hover:bg-neutral-50/40 transition-colors h-14 group"
+                        >
+                          {/* Left Locked Sticky Task Metadata Cell */}
+                          <div className="sticky left-0 z-50 w-[280px] shrink-0 bg-white group-hover:bg-neutral-50 border-r border-neutral-200 h-full flex items-center justify-between pl-4 pr-3 gap-2 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] transition-colors">
+                            <div className="min-w-0 space-y-0.5">
+                              <p className="text-xs font-bold text-neutral-800 truncate tracking-tight">
+                                {task.title}
+                              </p>
+                              <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 font-semibold font-mono">
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full shrink-0 ${parentProj?.color || "bg-neutral-300"}`}
+                                />
+                                <span className="truncate">
+                                  {parentProj?.name || "Unassigned"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Tiny inline row actions */}
+                            <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pr-1">
+                              <button
+                                type="button"
+                                onClick={() => triggerOpenEditMode(task)}
+                                className="text-neutral-400 hover:text-neutral-900 p-1 cursor-pointer"
+                              >
+                                <FaEdit size={11} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteConfirmationId(task.id)}
+                                className="text-neutral-400 hover:text-rose-600 p-1 cursor-pointer"
+                              >
+                                <FaTrashAlt size={10} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Right Timeline Lane Container Track */}
+                          <div
+                            className="flex-1 grid h-full items-center relative"
+                            style={{
+                              gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))`,
+                            }}
+                          >
+                            {/* Background Grid Guide Lines Matrix Layout */}
+                            {Array(totalDays)
+                              .fill(0)
+                              .map((_, idx) => (
+                                <div
+                                  key={idx}
+                                  className="absolute top-0 bottom-0 border-r border-neutral-100/60 pointer-events-none"
+                                  style={{
+                                    left: `${(idx + 1) * (100 / totalDays)}%`,
+                                  }}
+                                />
+                              ))}
+
+                            {/* RENDERING DYNAMIC WIDTH TIMELINE BAR TRACK */}
+                            <div
+                              style={{
+                                gridColumnStart: startColumn,
+                                gridColumnEnd: `span ${columnSpan}`,
+                              }}
+                              className={`relative mx-0.5 p-1.5 rounded-md border text-[9px] font-bold tracking-tight shadow-3xs truncate flex items-center justify-between transition-all duration-200 z-10 ${colorStyles}`}
+                              title={`${task.title} (${columnSpan} Days)`}
+                            >
+                              <span className="truncate pl-0.5 font-sans uppercase text-[8px] tracking-wide font-black">
+                                {task.status}
+                              </span>
+                              <span className="text-[8px] font-mono opacity-75 shrink-0 ml-1 bg-white/60 px-0.5 rounded-xs border border-black/5">
+                                {columnSpan}d
+                              </span>
+                            </div>
                           </div>
                         </div>
-
-                        {/* Statically displayed tracking operations row */}
-                        <div className="flex items-center gap-1 shrink-0 pr-2">
-                          <button
-                            type="button"
-                            onClick={() => triggerOpenEditMode(task)}
-                            className="text-neutral-400 hover:text-neutral-900 p-1 cursor-pointer"
-                          >
-                            <FaEdit size={10} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setDeleteConfirmationId(task.id)}
-                            className="text-neutral-400 hover:text-rose-600 p-1 cursor-pointer"
-                          >
-                            <FaTrashAlt size={9} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Right Grid Gantt Lane Track Area */}
-                      <div className="col-span-7 grid grid-cols-7 h-full items-center border-l border-neutral-100 relative min-h-[36px]">
-                        {Array(7)
-                          .fill(0)
-                          .map((_, idx) => (
-                            <div
-                              key={idx}
-                              className="absolute top-0 bottom-0 border-r border-neutral-100/40 pointer-events-none"
-                              style={{ left: `${(idx + 1) * (100 / 7)}%` }}
-                            />
-                          ))}
-
-                        <div
-                          className={`relative mx-2 p-1.5 rounded-lg border text-[10px] font-bold tracking-tight shadow-3xs truncate flex items-center justify-between ${spanClass}`}
-                        >
-                          <span className="truncate">{task.status}</span>
-                          <span className="text-[9px] font-mono opacity-80 shrink-0 ml-1">
-                            {task.startDate
-                              ? formatCardDate(task.startDate)
-                              : "TBD"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+                      );
+                    })
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-
+          );
+        })()}
       {/* 📊 LIST VIEW COMPONENT */}
       {localViewType === "list" && (
         <div className="border border-neutral-200/80 rounded-xl overflow-hidden bg-white shadow-3xs divide-y divide-neutral-100">
@@ -424,9 +531,10 @@ export default function TasksSheet() {
 
                         <div className="flex items-center gap-3 shrink-0">
                           <span className="text-[10px] text-neutral-400 font-mono">
-                            {task.dueDate
-                              ? formatCardDate(task.dueDate)
-                              : "No Due Date"}
+                            {task.startDate
+                              ? formatCardDate(task.startDate)
+                              : ""}{" "}
+                            -{task.dueDate ? formatCardDate(task.dueDate) : ""}
                           </span>
                           <div className="flex items-center gap-0.5">
                             <button
@@ -457,18 +565,14 @@ export default function TasksSheet() {
         </div>
       )}
 
-      {/* 🧱 PREMIUM TASK UPDATE/CREATOR MODAL LAYER */}
-      {isTaskModalOpen && (
-        <CreateTaskModal
-          isTaskModalOpen={isTaskModalOpen}
-          setIsTaskModalOpen={setIsTaskModalOpen}
-          projects={projects}
-          onCreateTask={handleCreateTask}
-          editingTask={editingTaskPayload} // Pass down editing target payload context
-        />
-      )}
+      <CreateTaskModal
+        editingTaskPayload={editingTaskPayload}
+        isTaskModalOpen={isTaskModalOpen}
+        setIsTaskModalOpen={setIsTaskModalOpen}
+        projects={projects}
+        onCreateTask={handleCreateTask}
+      />
 
-      {/* ⚠️ INTEGRATED DELETION CONFIRMATION DIALOG MODAL */}
       {deleteConfirmationId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-100">
           <div

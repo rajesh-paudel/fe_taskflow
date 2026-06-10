@@ -37,7 +37,7 @@ const Navbar = () => {
   return (
     <header className="border-b border-neutral-200/80 bg-white sticky top-0 z-50">
       <nav
-        className="mx-auto grid items-center gap-4 px-6 py-4 md:grid-cols-[1fr_auto_1fr] lg:px-8 max-w-7xl"
+        className="w-full grid items-center gap-4 px-6 py-4 md:grid-cols-[1fr_auto_1fr] lg:px-8 "
         aria-label="Main navigation"
       >
         {/* BRAND IDENTITY */}

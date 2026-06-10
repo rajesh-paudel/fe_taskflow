@@ -29,7 +29,14 @@ export default function Register() {
       toast.success("Account created successfully!");
       navigate("/login");
     } catch (err) {
-      toast.error(err);
+      console.error("register submission failed:", err);
+
+      const errorMessage =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Invalid email or password.";
+
+      toast.error(errorMessage);
     } finally {
       setIsRegistering(false);
     }

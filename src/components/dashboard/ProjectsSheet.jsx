@@ -27,7 +27,7 @@ export default function ProjectsSheet() {
     isCreating,
   } = useProjects();
   const { tasks } = useTasks();
-  console.log(projects, tasks);
+
   const [projectLayoutMode, setProjectLayoutMode] = useState("grid");
   const [deleteProjectId, setDeleteProjectId] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
@@ -95,7 +95,7 @@ export default function ProjectsSheet() {
     if (!deleteProjectId) return null;
     deleteProject(deleteProjectId);
     setDeleteProjectId(null);
-    toast.success("Project deleted successfully!")
+    toast.success("Project deleted successfully!");
   };
   return (
     <div className="space-y-6">

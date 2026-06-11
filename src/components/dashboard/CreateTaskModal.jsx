@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { FaFolder, FaUserPlus, FaTimes } from "react-icons/fa";
-
+import React, { useState, useEffect, useRef } from "react";
+import { FaFolder, FaUserPlus, FaTimes, FaSpinner } from "react-icons/fa";
+import { api } from "../../services/api";
 const CreateTaskModal = ({
   editingTaskPayload,
   setIsTaskModalOpen,
@@ -14,16 +14,19 @@ const CreateTaskModal = ({
   const [newTaskStatus, setNewTaskStatus] = useState("To Do");
   const [newTaskPriority, setNewTaskPriority] = useState("Medium");
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   // Default to first project if available, otherwise blank string
 
   const [selectedProjectId, setSelectedProjectId] = useState(
     projects.length > 0 ? projects[0].id : "",
   );
 
-  // Assignee email management states
-  const [emailInput, setEmailInput] = useState("");
   const [newTaskAssignees, setNewTaskAssignees] = useState([]);
-
+  const dropdownRef = useRef(null);
+  console.log(searchQuery);
   const isEditing = !!editingTaskPayload;
   useEffect(() => {
     if (isTaskModalOpen) {
@@ -31,7 +34,7 @@ const CreateTaskModal = ({
         setNewTaskTitle(editingTaskPayload.title || "");
         setNewTaskStartDate(editingTaskPayload.startDate || "");
         setNewTaskDueDate(editingTaskPayload.dueDate || "");
-        setNewTaskStatus(editingTaskPayload.status || "Todo");
+        setNewTaskStatus(editingTaskPayload.status || "To Do ");
         setNewTaskPriority(editingTaskPayload.priority || "Medium");
         setSelectedProjectId(editingTaskPayload.projectId || "");
         setNewTaskAssignees(editingTaskPayload.assigneeEmails || []);
@@ -39,32 +42,71 @@ const CreateTaskModal = ({
         setNewTaskTitle("");
         setNewTaskStartDate("");
         setNewTaskDueDate("");
-        setNewTaskStatus("Todo");
+        setNewTaskStatus("To Do");
         setNewTaskPriority("Medium");
         setSelectedProjectId(projects.length > 0 ? projects[0].id : "");
         setNewTaskAssignees([]);
       }
-      setEmailInput("");
+      setSearchQuery("");
     }
   }, [editingTaskPayload, isTaskModalOpen, projects]);
 
   if (!isTaskModalOpen) return null;
 
-  // 👥 Handle adding email strings to local list array
-  const handleAddEmailTag = () => {
-    const cleanEmail = emailInput.trim().toLowerCase();
-    if (cleanEmail && !newTaskAssignees.includes(cleanEmail)) {
-      setNewTaskAssignees([...newTaskAssignees, cleanEmail]);
-      setEmailInput("");
+  // 1. Debounced Backend API Fetching logic
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setIsLoading(false);
+      return;
     }
+
+    setIsLoading(true);
+
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        // Replace with your exact backend URL instance
+        const response = await api.get(`/users?search=${searchQuery}`);
+        setSearchResults(response.data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
+  //  Close dropdown if clicking outside the component
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Select user from list
+  const handleSelectUser = (user) => {
+    // Prevent duplicates just in case
+    if (!newTaskAssignees.some((assignee) => assignee._id === user._id)) {
+      setNewTaskAssignees([...newTaskAssignees, user]);
+    }
+    setSearchQuery(""); // Reset input text
+    setShowDropdown(false);
+  };
+  //  Remove user tag
+  const handleRemoveAssignee = (userId) => {
+    setNewTaskAssignees(newTaskAssignees.filter((user) => user._id !== userId));
   };
 
-  const handleRemoveEmailTag = (emailToRemove) => {
-    setNewTaskAssignees(
-      newTaskAssignees.filter((email) => email !== emailToRemove),
-    );
-  };
-
+  // Filter out users from the dropdown who have already been selected
+  const visibleResults = searchResults.filter(
+    (user) => !newTaskAssignees.some((assignee) => assignee._id === user._id),
+  );
   const onModalSubmit = (e) => {
     e.preventDefault();
 
@@ -74,7 +116,7 @@ const CreateTaskModal = ({
       title: newTaskTitle.trim(),
       startDate: newTaskStartDate,
       dueDate: newTaskDueDate,
-      assigneeEmails: newTaskAssignees,
+      assignees: newTaskAssignees.map((user) => user._id),
       status: newTaskStatus,
       priority: newTaskPriority,
     };
@@ -84,7 +126,7 @@ const CreateTaskModal = ({
     setNewTaskTitle("");
     setNewTaskStartDate("");
     setNewTaskDueDate("");
-    setNewTaskStatus("Todo");
+    setNewTaskStatus("To Do");
     setNewTaskPriority("Medium");
     setNewTaskAssignees([]);
     setIsTaskModalOpen(false);
@@ -146,46 +188,88 @@ const CreateTaskModal = ({
             </div>
           </div>
 
-          {/*  REGISTERED USER GMAIL SEARCH */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 relative" ref={dropdownRef}>
             <label className="text-[11px] font-bold text-neutral-700">
               Assign Members via Registered Gmail
             </label>
+
+            {/* SEARCH INPUT WRAPPER */}
             <div className="flex items-center gap-1.5 bg-white border border-neutral-200 rounded-lg px-2 py-1 focus-within:border-neutral-950 transition-all">
               <input
-                type="email"
-                placeholder="e.g., workspaceuser@gmail.com"
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddEmailTag();
-                  }
+                type="text"
+                placeholder="Search by name or email..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowDropdown(true);
                 }}
+                onFocus={() => setShowDropdown(true)}
                 className="w-full bg-transparent border-0 p-1 text-xs font-medium focus:outline-hidden text-neutral-800 placeholder-neutral-400"
               />
-              <button
-                type="button"
-                onClick={handleAddEmailTag}
-                className="p-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-md transition-colors cursor-pointer"
-              >
-                <FaUserPlus size={11} />
-              </button>
+
+              {/* Loading Spinner Indicator */}
+              {isLoading && (
+                <FaSpinner
+                  className="animate-spin text-neutral-400 mr-1"
+                  size={12}
+                />
+              )}
             </div>
 
+            {/* FLOATING DROPDOWN MODAL/LIST */}
+            {showDropdown && searchQuery.trim().length > 0 && (
+              <div className="absolute z-50 w-full bg-white border border-neutral-200 shadow-lg rounded-lg max-h-48 overflow-y-auto mt-0.5 custom-scrollbar">
+                {isLoading && visibleResults.length === 0 ? (
+                  <div className="p-3 text-center text-xs text-neutral-500 font-medium">
+                    Searching user directory...
+                  </div>
+                ) : visibleResults.length > 0 ? (
+                  <div className="p-1 divide-y divide-neutral-50">
+                    {visibleResults.map((user) => (
+                      <button
+                        key={user._id}
+                        type="button"
+                        onClick={() => handleSelectUser(user)}
+                        className="w-full flex items-center justify-between text-left px-2.5 py-2 hover:bg-neutral-50 rounded-md transition-colors group"
+                      >
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs font-semibold text-neutral-800 truncate">
+                            {user.name}
+                          </span>
+                          <span className="text-[10px] text-neutral-400 truncate">
+                            {user.email}
+                          </span>
+                        </div>
+                        <FaUserPlus
+                          className="text-neutral-300 group-hover:text-[#5A24CA] transition-colors"
+                          size={12}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3 text-center text-xs text-neutral-400 font-medium">
+                    No registered accounts found
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SELECTED ASSIGNEE TAGS */}
             {newTaskAssignees?.length > 0 && (
               <div className="flex flex-wrap gap-1 pt-1 max-h-[60px] overflow-y-auto">
-                {newTaskAssignees.map((email) => (
+                {newTaskAssignees.map((user) => (
                   <span
-                    key={email}
-                    className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 bg-[#5A24CA]/5 text-[#5A24CA] border border-[#5A24CA]/20 rounded-md"
+                    key={user._id}
+                    className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 bg-[#5A24CA]/5 text-[#5A24CA] border border-[#5A24CA]/20 rounded-md"
                   >
-                    <span className="truncate max-w-[140px]">{email}</span>
+                    <span className="truncate max-w-[140px]">
+                      {user.name} ({user.email})
+                    </span>
                     <button
                       type="button"
-                      onClick={() => handleRemoveEmailTag(email)}
-                      className="hover:text-rose-600 p-0.5 transition-colors cursor-pointer"
+                      onClick={() => handleRemoveAssignee(user._id)}
+                      className="hover:text-rose-600 p-0.5 transition-colors cursor-pointer flex-shrink-0"
                     >
                       <FaTimes size={8} />
                     </button>

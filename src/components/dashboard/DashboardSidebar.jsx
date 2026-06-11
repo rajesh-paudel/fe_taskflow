@@ -14,9 +14,6 @@ export default function DashboardSidebar({
   onTabChange,
 }) {
   const { user, logout } = useAuth();
-  const handleMenuClick = (tabId) => {
-    setActiveTab(tabId);
-  };
 
   return (
     <aside className="w-full md:w-68 shrink-0 border-b md:border-b-0 md:border-r border-neutral-200/80 bg-neutral-50 p-4 flex flex-col justify-between h-auto md:h-full overflow-y-auto">

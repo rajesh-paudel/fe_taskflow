@@ -30,7 +30,7 @@ export default function TasksSheet() {
   const [selectedProjectId, setSelectedProjectId] = useState("all");
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTaskPayload, setEditingTaskPayload] = useState(null);
-
+  console.log(tasks);
   // Confirmation Delete States
   const [deleteConfirmationId, setDeleteConfirmationId] = useState(null);
   const filteredTasks =
@@ -565,13 +565,15 @@ export default function TasksSheet() {
         </div>
       )}
 
-      <CreateTaskModal
-        editingTaskPayload={editingTaskPayload}
-        isTaskModalOpen={isTaskModalOpen}
-        setIsTaskModalOpen={setIsTaskModalOpen}
-        projects={projects}
-        onCreateTask={handleCreateTask}
-      />
+      {isTaskModalOpen && (
+        <CreateTaskModal
+          editingTaskPayload={editingTaskPayload}
+          isTaskModalOpen={isTaskModalOpen}
+          setIsTaskModalOpen={setIsTaskModalOpen}
+          projects={projects}
+          onCreateTask={handleCreateTask}
+        />
+      )}
 
       {deleteConfirmationId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-100">

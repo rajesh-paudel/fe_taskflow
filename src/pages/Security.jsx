@@ -16,9 +16,6 @@ export default function Security() {
 
   return (
     <div className="min-h-screen bg-white text-neutral-950 font-sans antialiased selection:bg-neutral-100">
-      {/* ========================================== */}
-      {/* HERO SECTION                               */}
-      {/* ========================================== */}
       <div className="py-24 px-6 relative border-b border-neutral-100 bg-neutral-50/20">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3f4f6_1px,transparent_1px),linear-gradient(to_bottom,#f3f4f6_1px,transparent_1px)] bg-[size:5rem_5rem] opacity-30 pointer-events-none" />
 

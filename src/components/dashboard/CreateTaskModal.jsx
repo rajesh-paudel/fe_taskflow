@@ -26,8 +26,9 @@ const CreateTaskModal = ({
 
   const [newTaskAssignees, setNewTaskAssignees] = useState([]);
   const dropdownRef = useRef(null);
-  console.log(searchQuery);
+
   const isEditing = !!editingTaskPayload;
+  console.log(editingTaskPayload);
   useEffect(() => {
     if (isTaskModalOpen) {
       if (editingTaskPayload) {
@@ -37,7 +38,7 @@ const CreateTaskModal = ({
         setNewTaskStatus(editingTaskPayload.status || "To Do ");
         setNewTaskPriority(editingTaskPayload.priority || "Medium");
         setSelectedProjectId(editingTaskPayload.projectId || "");
-        setNewTaskAssignees(editingTaskPayload.assigneeEmails || []);
+        setNewTaskAssignees(editingTaskPayload.assignees || []);
       } else {
         setNewTaskTitle("");
         setNewTaskStartDate("");
@@ -50,8 +51,6 @@ const CreateTaskModal = ({
       setSearchQuery("");
     }
   }, [editingTaskPayload, isTaskModalOpen, projects]);
-
-  if (!isTaskModalOpen) return null;
 
   // 1. Debounced Backend API Fetching logic
   useEffect(() => {
@@ -131,7 +130,7 @@ const CreateTaskModal = ({
     setNewTaskAssignees([]);
     setIsTaskModalOpen(false);
   };
-
+  if (!isTaskModalOpen) return null;
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-neutral-950/40 backdrop-blur-xs">
       <div className="relative bg-white rounded-xl border border-neutral-200 max-w-md w-full p-5 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">

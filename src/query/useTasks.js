@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 export function useTasks() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const {
     data: tasks = [],
@@ -11,7 +13,7 @@ export function useTasks() {
     error,
     isFetching,
   } = useQuery({
-    queryKey: ["dashboard-tasks"],
+    queryKey: ["dashboard-tasks", user?.id],
     queryFn: async () => {
       const { data } = await api.get(`/tasks`);
       return data;

@@ -1,8 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+
 export function useProjects() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const {
     data: projects = [],
@@ -11,7 +14,7 @@ export function useProjects() {
     error,
     isFetching,
   } = useQuery({
-    queryKey: ["workspace-projects"],
+    queryKey: ["workspace-projects", user?.id],
     queryFn: async () => {
       const { data } = await api.get("projects");
       return data;

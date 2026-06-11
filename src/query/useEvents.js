@@ -1,13 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { api } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 export const useEvents = (year, month) => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // Fetch events for the current grid month
   const { data: events = [], isLoading } = useQuery({
-    queryKey: ["events", year, month],
+    queryKey: ["events", year, month, user?.id],
     queryFn: async () => {
       const { data } = await api.get(`/events?year=${year}&month=${month}`);
       return data;

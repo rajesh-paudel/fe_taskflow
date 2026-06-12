@@ -64,7 +64,7 @@ export default function Dashboard() {
       case "calender":
         return <CalenderSheet />;
       case "chat":
-        return <ChatSheet />;
+        return <ChatSheet currentUser={user} />;
       case "meetings":
         return <MeetingSheet />;
       default:

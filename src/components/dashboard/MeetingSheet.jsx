@@ -6,13 +6,12 @@ import {
   FaMapMarkerAlt,
   FaCalendarPlus,
   FaSearch,
-  FaUsers,
   FaClock,
   FaCircle,
   FaTrashAlt,
   FaEdit,
 } from "react-icons/fa";
-
+import emptyProfilePlaceholder from "../../assets/emptyProfilePlaceholder.png";
 const MeetingSheet = () => {
   const {
     meetings,
@@ -30,10 +29,10 @@ const MeetingSheet = () => {
     updateMeetingStatus,
   } = useMeetingOperations();
 
-  // Internal component runtime configuration state for track inline context dropdown operations
+  // Internal component runtime configuration state for tracking dropdowns
   const [activeDropdownId, setActiveDropdownId] = useState(null);
 
-  // Helper helper to convert 24h standard payload time strings to legible AM/PM components
+  // Helper to convert 24h standard payload time strings to legible AM/PM components
   const formatTimeLabel = (timeStr) => {
     if (!timeStr) return "TBD";
     if (timeStr.includes("AM") || timeStr.includes("PM")) return timeStr;
@@ -49,7 +48,7 @@ const MeetingSheet = () => {
       className="space-y-4 p-2 max-w-7xl mx-auto select-none"
       onClick={() => setActiveDropdownId(null)}
     >
-      {/* 🚀 TOP MODULE HEADER PANEL */}
+      {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 border border-neutral-200 rounded-xl shadow-3xs">
         <div>
           <h2 className="text-sm font-black text-neutral-950 tracking-tight">
@@ -108,14 +107,14 @@ const MeetingSheet = () => {
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
               <tr className="bg-neutral-50 border-b border-neutral-200 text-[10px] font-bold text-neutral-400 uppercase tracking-wider h-10">
-                <th className="pl-4 w-[340px]">
+                <th className="pl-4 w-[320px]">
                   Meeting Parameters & Scope Description
                 </th>
-                <th className="w-[180px]">Timeline Interval</th>
+                <th className="w-[160px]">Timeline Interval</th>
                 <th className="w-[130px]">Infrastructure Type</th>
-                <th className="w-[140px]">Target Location Node</th>
-                <th className="w-[130px]">Roster Count</th>
-                <th className="w-[130px]">Status Capsule</th>
+                <th className="w-[150px]">Target Location Node</th>
+                <th className="w-[160px]">Roster Attendees</th>
+                <th className="w-[120px]">Status Capsule</th>
                 <th className="pr-4 text-right w-[100px]">Action Matrix</th>
               </tr>
             </thead>
@@ -131,6 +130,9 @@ const MeetingSheet = () => {
                 </tr>
               ) : (
                 meetings.map((mtg) => {
+                  // Fallback for ID depending on how your hook returns data
+                  const meetingId = mtg.id || mtg._id;
+
                   let statusCapsule =
                     "bg-amber-50 text-amber-800 border-amber-200";
                   if (mtg.status === "In Progress")
@@ -140,16 +142,16 @@ const MeetingSheet = () => {
                     statusCapsule =
                       "bg-emerald-50 text-emerald-800 border-emerald-200/60";
 
-                  const isLink = mtg.location.startsWith("http");
+                  const isLink = mtg.location?.startsWith("http");
 
                   return (
                     <tr
-                      key={mtg.id}
+                      key={meetingId}
                       className="hover:bg-neutral-50/20 transition-colors group h-18"
                     >
                       {/* Meta Block column metadata info */}
                       <td className="pl-4 py-3 pr-3">
-                        <div className="space-y-0.5 max-w-[320px]">
+                        <div className="space-y-0.5 max-w-[300px]">
                           <div className="flex items-center gap-1.5">
                             {mtg.priority === "High" && (
                               <FaCircle
@@ -198,7 +200,7 @@ const MeetingSheet = () => {
                       </td>
 
                       {/* Hyperlinks or locations rendering check */}
-                      <td className="py-3 pr-2 max-w-[130px]">
+                      <td className="py-3 pr-2 max-w-[140px]">
                         {isLink ? (
                           <a
                             href={mtg.location}
@@ -216,11 +218,33 @@ const MeetingSheet = () => {
                         )}
                       </td>
 
-                      {/* Member list array counts */}
                       <td className="py-3 pr-2">
-                        <div className="flex items-center gap-1 text-neutral-500 font-semibold font-mono text-[11px]">
-                          <FaUsers size={11} className="text-neutral-400" />
-                          <span>{mtg.attendees?.length || 0} members</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex -space-x-2 overflow-hidden">
+                            {(mtg.attendees || [])
+                              .slice(0, 3)
+                              .map((attendee, idx) => (
+                                <img
+                                  key={attendee._id || idx}
+                                  className="inline-block h-6 w-6 rounded-full ring-2 ring-white object-cover"
+                                  src={
+                                    attendee.avatar || emptyProfilePlaceholder
+                                  }
+                                  alt={attendee.name || "Attendee"}
+                                  title={attendee.name}
+                                />
+                              ))}
+                          </div>
+                          {mtg.attendees?.length > 3 && (
+                            <span className="text-[10px] font-mono text-neutral-400 font-bold">
+                              +{mtg.attendees.length - 3} more
+                            </span>
+                          )}
+                          {(!mtg.attendees || mtg.attendees.length === 0) && (
+                            <span className="text-[10px] text-neutral-400 italic">
+                              Empty Roster
+                            </span>
+                          )}
                         </div>
                       </td>
 
@@ -232,7 +256,7 @@ const MeetingSheet = () => {
                         <select
                           value={mtg.status}
                           onChange={(e) =>
-                            updateMeetingStatus(mtg.id, e.target.value)
+                            updateMeetingStatus(meetingId, e.target.value)
                           }
                           className={`text-[9px] font-black uppercase tracking-wider rounded-md border p-1 focus:outline-hidden cursor-pointer ${statusCapsule}`}
                         >
@@ -242,7 +266,7 @@ const MeetingSheet = () => {
                         </select>
                       </td>
 
-                      {/* Operations management action button controls execution block */}
+                      {/* Action buttons controls execution block */}
                       <td
                         className="pr-4 py-3 text-right"
                         onClick={(e) => e.stopPropagation()}
@@ -258,7 +282,7 @@ const MeetingSheet = () => {
                           </button>
                           <button
                             type="button"
-                            onClick={() => deleteMeeting(mtg.id)}
+                            onClick={() => deleteMeeting(meetingId)}
                             className="p-1.5 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
                             title="De-allocate Session Block"
                           >
@@ -275,7 +299,6 @@ const MeetingSheet = () => {
         </div>
       </div>
 
-      {/* 📊 MODAL PORTAL INJECTION ANCHOR NODE */}
       <CreateMeetingModal
         isOpen={isModalOpen}
         onClose={closeModal}

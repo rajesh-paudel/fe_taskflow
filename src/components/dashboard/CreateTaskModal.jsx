@@ -28,7 +28,7 @@ const CreateTaskModal = ({
   const dropdownRef = useRef(null);
 
   const isEditing = !!editingTaskPayload;
-  console.log(editingTaskPayload);
+
   useEffect(() => {
     if (isTaskModalOpen) {
       if (editingTaskPayload) {
